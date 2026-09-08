@@ -1,77 +1,57 @@
-# ClassNotes – AI-Powered Student Dashboard & Study Hub
+# 📚 ClassNotes — Academic Study Hub & AI Assistant
 
-**ClassNotes** is a full-stack MERN application designed to streamline academic workflows for students. It combines course and notes management, assignment and exam tracking, inline document previews, and a multimodal AI academic mentor powered by Google Gemini.
+A modern, full-stack academic productivity web application built with the **MERN Stack** and **Ant Design (v5)**. Designed for university students to organize course folders, track academic tasks, manage documents, and leverage AI for study assistance, automated summaries, and quiz assessments.
 
 ---
 
 ## 🌟 Key Features
 
-* **AI Study Assistant (Multimodal)**
-  * Powered by Google Gemini (`gemini-3.6-flash`).
-  * Strict academic tutoring system instruction (focuses on coursework, assignments, and exam preparation).
-  * **Multimodal input:** Upload notebook photos, screenshots, and diagrams for AI analysis.
-  * **Voice-to-Text:** Integrated Web Speech API for voice prompt dictation.
-  * **Persistent Chat History:** MongoDB-backed chat sessions per user.
-  * Markdown rendering (`react-markdown`) and one-click message copy.
+### 📁 Subject & Notes Management
+- **Course Folders:** Organize notes, chapters, topics, and assignments by subject code.
+- **Multi-Format Uploads:** Support for PDFs, documents, images, and embedded Google Drive links.
+- **In-Browser Document Previewer:** Direct interactive viewer for PDFs and image attachments without leaving the workspace.
+- **Smart Filtering:** Filter course notes by tags (`mid`, `final`, `imp`, `general`) and instant search across chapters.
 
-* **Notes & Document Management**
-  * Organize notes by Subject, Topic, Chapter, and Tag badges (`mid`, `imp`, `final`, `general`).
-  * File uploads (PDF, images) via Multer, plus direct Google Drive embed support.
-  * Inline document preview modal supporting native PDF streaming and full-page viewing.
-  * Quick AI Summarizer button on note cards for rapid exam revision.
+### 🤖 AI Academic Assistant
+- **Context-Aware Study Mentor:** Chat with AI about uploaded notes, syllabus concepts, and assignment structuring.
+- **Document & PDF Summarization:** Extract structured summaries and key revision takeaways from study materials in one click.
+- **Voice Typing & Attachments:** Integrated Web Speech API for voice queries and direct document attachments in chat.
+- **AI Practice Assessments:** Generate interactive quiz modules from course materials to test exam readiness.
 
-* **Subject & Todo Tracking**
-  * Subject folders with code tags (e.g., `CS-101`).
-  * Integrated todo board to manage study milestones and submission deadlines.
+### 📋 Task & Todo Scheduling
+- **Academic Milestone Tracking:** Schedule tasks, assignment deadlines, and exam dates with location tags.
+- **Dynamic View Modal:** Fast detail previewing without page reloads.
+- **Adaptive Layout:** Responsive data table on desktop with auto-switching to compact cards on mobile viewports.
 
-* **User Profile & Persistence**
-  * Custom avatar uploads stored locally and served via Express static middleware.
-  * Dynamic semester tracking and persistent user session management via JWT.
+### 🎨 User Experience & Design
+- **Deep-Dark Aesthetic:** Customized Ant Design dark algorithm (`#080816`, `#0c0d1e`) with clean indigo accents.
+- **Responsive Architecture:** Mobile-first layout optimization powered by `Grid.useBreakpoint`.
+- **Profile & Identity:** User avatar customization with interactive zoom/pan controls and semester tracking.
 
 ---
 
 ## 🛠️ Tech Stack
 
 ### Frontend
-* **Core:** React.js, Vite, React Router v6
-* **UI Framework:** Ant Design (AntD), Bootstrap Utilities, SCSS
-* **Icons:** `@ant-design/icons`
-* **Markdown:** `react-markdown`
-* **HTTP Client:** Axios
+- **React.js (Vite)**
+- **Ant Design (v5+)** (`ConfigProvider`, `Grid.useBreakpoint`, `Modal`, `Form`, `Image`)
+- **Axios** (REST API Client)
+- **React Router DOM**
+- **React Markdown** (Formatted AI chat & summary output)
+- **Sass / SCSS** (Custom dark utilities and layout animations)
 
 ### Backend
-* **Runtime:** Node.js, Express.js
-* **Database:** MongoDB, Mongoose ODM
-* **Authentication:** JWT (JSON Web Tokens), bcryptjs
-* **File Handling:** Multer, Node `fs` & `path`
-* **AI Engine:** `@google/genai` (Google Generative AI SDK)
+- **Node.js & Express.js** (REST API Architecture)
+- **MongoDB & Mongoose** (Database schemas & relationships)
+- **JWT (JSON Web Tokens)** (Protected route authorization)
+- **Multer** (File and document upload handling)
+- **Google Generative AI / Gemini API** (Document summarization and academic chat)
 
 ---
 
-## 📁 Project Structure
+## 🚀 Getting Started
 
-```text
-Notes_collect/
-├── backend/
-│   ├── public/
-│   │   └── temp/              # Uploaded files, avatars, and attachments
-│   ├── src/
-│   │   ├── Config/            # Database connection setup (db.js)
-│   │   ├── Controller/        # AI, Notes, Subject, Avatar, Todo controllers
-│   │   ├── Middlewares/       # Auth (JWT) & Multer file upload middlewares
-│   │   ├── Models/            # Mongoose Schemas (User, Note, Subject, Chat, Todo)
-│   │   └── Routes/            # API Route definitions
-│   ├── .env                   # Backend environment variables
-│   ├── index.js               # Server entry point
-│   └── package.json
-│
-└── frontend/
-    ├── src/
-    │   ├── assets/            # Static assets and logos
-    │   ├── components/        # Modals (AddNoteModal, PreviewModal)
-    │   ├── pages/
-    │   │   └── Dashboard/     # Dashboard, IndividualCards, AIChat, Profile, Todos
-    │   ├── App.jsx
-    │   └── main.jsx
-    ├── package.json
-    └── vite.config.js
+### 1. Clone the Repository
+```bash
+git clone [https://github.com/your-username/classnotes.git](https://github.com/your-username/classnotes.git)
+cd classnotes
