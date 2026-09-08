@@ -1,13 +1,18 @@
 import { useEffect, useState } from "react";
-import { Col, Popconfirm, Row, Spin, message } from "antd";
-import { PlusOutlined, BookOutlined, DeleteOutlined } from "@ant-design/icons";
+import { Col, Popconfirm, Row, Spin, message, Grid, Button } from "antd";
+import { PlusOutlined, BookOutlined, DeleteOutlined, ThunderboltOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+
+const { useBreakpoint } = Grid;
 
 const Dashhome = () => {
   const navigate = useNavigate();
   const [subjects, setSubjects] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const screens = useBreakpoint();
+  const isMobile = !screens.sm;
 
   // 1. Fetch Subjects from MongoDB
   const fetchSubjects = async () => {
@@ -35,12 +40,8 @@ const Dashhome = () => {
     fetchSubjects();
   }, []);
 
-  // 2. Delete Subject Handler with Local State Sync
-  const handleDelete = async (e, subjectId) => {
-    e.stopPropagation(); // 👈 Card click navigate hone se rokega
-    const confirmDelete = window.confirm("Are you sure you want to delete this subject folder?");
-    if (!confirmDelete) return;
-
+  // 2. Delete Subject Handler
+  const handleDelete = async (subjectId) => {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.delete(`http://localhost:5000/api/subjects/${subjectId}`, {
@@ -51,7 +52,6 @@ const Dashhome = () => {
 
       if (res.data.success) {
         message.success(res.data.message || "Subject deleted successfully");
-        // 👈 State update taake card bina page reload ke screen se gayab ho jaye
         setSubjects((prev) => prev.filter((sub) => sub._id !== subjectId));
       }
     } catch (error) {
@@ -61,39 +61,57 @@ const Dashhome = () => {
   };
 
   return (
-    <div className="container" style={{ maxWidth: "1140px", margin: "0 auto", padding: "12px" }}>
+    <div
+      className="dashhome-container"
+      style={{
+        maxWidth: "1180px",
+        margin: "0 auto",
+        padding: isMobile ? "12px" : "24px 20px",
+      }}
+    >
       {/* Top Header Row */}
-      <Row justify="space-between" align="middle" style={{ marginBottom: "32px" }}>
-        <Col>
-          <h2 style={{ color: "#ffffff", fontSize: "26px", fontWeight: "700", margin: 0 }}>
-            Your subjects
-          </h2>
-          <p style={{ color: "#7b7a94", fontSize: "14px", margin: "4px 0 0" }}>
-            Open a folder to view and upload notes.
-          </p>
-        </Col>
-
-        <Col>
-          <button
-            onClick={() => navigate("/dashboard/new-subject")}
+      <div
+        style={{
+          display: "flex",
+          flexDirection: isMobile ? "column" : "row",
+          justifyContent: "space-between",
+          alignItems: isMobile ? "stretch" : "center",
+          gap: "14px",
+          marginBottom: "28px",
+        }}
+      >
+        <div>
+          <h2
             style={{
-              backgroundColor: "#827AFF",
-              color: "#000000",
-              padding: "10px 22px",
-              border: "none",
-              fontWeight: "600",
-              fontSize: "14px",
-              display: "flex",
-              gap: "8px",
-              alignItems: "center",
-              cursor: "pointer",
-              borderRadius: "8px",
+              color: "#ffffff",
+              fontSize: isMobile ? "20px" : "24px",
+              fontWeight: "700",
+              margin: 0,
             }}
           >
-            <PlusOutlined /> New Subject
-          </button>
-        </Col>
-      </Row>
+            Your Subjects
+          </h2>
+          <p style={{ color: "#94a3b8", fontSize: "13px", margin: "4px 0 0" }}>
+            Open a subject folder to view notes, generate quizzes, or chat with AI.
+          </p>
+        </div>
+
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={() => navigate("/dashboard/new-subject")}
+          style={{
+            backgroundColor: "#6366f1",
+            borderColor: "#6366f1",
+            fontWeight: 600,
+            height: isMobile ? "40px" : "44px",
+            borderRadius: "8px",
+            boxShadow: "0 4px 14px rgba(99, 102, 241, 0.35)",
+          }}
+        >
+          New Subject
+        </Button>
+      </div>
 
       {/* Main Content Area */}
       {loading ? (
@@ -105,10 +123,10 @@ const Dashhome = () => {
         <div
           style={{
             width: "100%",
-            background: "transparent",
+            background: "#0d1026",
             border: "1px solid rgba(255, 255, 255, 0.08)",
-            borderRadius: "20px",
-            padding: "70px 20px",
+            borderRadius: "16px",
+            padding: isMobile ? "45px 16px" : "70px 20px",
             textAlign: "center",
             display: "flex",
             flexDirection: "column",
@@ -120,69 +138,74 @@ const Dashhome = () => {
               width: "56px",
               height: "56px",
               borderRadius: "14px",
-              background: "rgba(125, 95, 255, 0.15)",
-              color: "#827aff",
+              background: "rgba(99, 102, 241, 0.15)",
+              color: "#818cf8",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               marginBottom: "18px",
-              border: "1px solid rgba(125, 95, 255, 0.25)",
+              border: "1px solid rgba(99, 102, 241, 0.25)",
             }}
           >
-            <BookOutlined style={{ fontSize: "22px" }} />
+            <BookOutlined style={{ fontSize: "24px" }} />
           </div>
-          <h3 style={{ color: "#ffffff", fontSize: "20px", fontWeight: "700", marginBottom: "8px" }}>
+          <h3 style={{ color: "#ffffff", fontSize: "18px", fontWeight: "700", marginBottom: "8px" }}>
             Your shelf is empty
           </h3>
-          <p style={{ color: "#7b7a94", fontSize: "14px", maxWidth: "460px", marginBottom: "24px" }}>
-            Create your first subject folder to start uploading notes, chatting with AI, and generating quizzes.
+          <p style={{ color: "#94a3b8", fontSize: "13.5px", maxWidth: "440px", marginBottom: "20px", lineHeight: 1.5 }}>
+            Create your first subject folder to start organizing notes, interacting with AI, and preparing for exams.
           </p>
-          <button
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
             onClick={() => navigate("/dashboard/new-subject")}
             style={{
-              background: "#827AFF",
-              color: "#000000",
-              border: "none",
-              padding: "10px 22px",
+              background: "#6366f1",
+              borderColor: "#6366f1",
+              fontWeight: 600,
+              height: "40px",
               borderRadius: "8px",
-              fontWeight: "600",
-              cursor: "pointer",
             }}
           >
-            + Create your first subject
-          </button>
+            Create your first subject
+          </Button>
         </div>
       ) : (
         /* Dynamic Subject Cards */
-        <Row gutter={[20, 20]}>
+        <Row gutter={[16, 16]}>
           {subjects.map((item) => (
             <Col xs={24} sm={12} md={8} lg={6} key={item._id}>
               <div
                 style={{
-                  background: "rgba(13, 12, 29, 0.45)",
-                  backdropFilter: "blur(10px)",
-                  WebkitBackdropFilter: "blur(10px)",
+                  background: "#0c0d1e",
                   border: "1px solid rgba(255, 255, 255, 0.08)",
-                  borderRadius: "16px",
-                  padding: "22px 20px",
-                  cursor: "pointer",
-                  transition: "all 0.2s ease",
+                  borderRadius: "14px",
+                  padding: "18px",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                  minHeight: "180px",
+                  transition: "border-color 0.2s, transform 0.2s",
                 }}
               >
-                {/* Clickable Area to open Details */}
-                <div onClick={() => navigate(`/dashboard/${item._id}`)}>
+                {/* Clickable Area to open Subject Details */}
+                <div
+                  onClick={() => navigate(`/dashboard/${item._id}`)}
+                  style={{ cursor: "pointer" }}
+                >
                   <div
                     style={{
-                      width: "44px",
-                      height: "44px",
-                      background: "#6c5ce7",
-                      borderRadius: "12px",
+                      width: "40px",
+                      height: "40px",
+                      background: "linear-gradient(135deg, #6366f1, #4338ca)",
+                      borderRadius: "10px",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
                       color: "#ffffff",
-                      fontSize: "20px",
-                      marginBottom: "16px",
+                      fontSize: "18px",
+                      marginBottom: "14px",
+                      boxShadow: "0 4px 12px rgba(99, 102, 241, 0.3)",
                     }}
                   >
                     <BookOutlined />
@@ -190,22 +213,26 @@ const Dashhome = () => {
 
                   <span
                     style={{
-                      color: "#7b7a94",
-                      fontSize: "12px",
-                      fontWeight: "500",
+                      color: "#818cf8",
+                      fontSize: "11.5px",
+                      fontWeight: "600",
+                      letterSpacing: "0.5px",
                       display: "block",
                       marginBottom: "4px",
+                      textTransform: "uppercase",
                     }}
                   >
-                    {item.code}
+                    {item.code || "SUBJECT"}
                   </span>
 
                   <h4
                     style={{
                       color: "#ffffff",
-                      fontSize: "16px",
+                      fontSize: "15.5px",
                       fontWeight: "600",
-                      margin: "0 0 16px 0",
+                      margin: "0 0 12px 0",
+                      lineHeight: 1.4,
+                      wordBreak: "break-word",
                     }}
                   >
                     {item.name}
@@ -213,33 +240,65 @@ const Dashhome = () => {
                 </div>
 
                 {/* Footer Actions */}
-                <div className="d-flex flex-row align-items-center justify-content-between">
-                  <div style={{ color: "#827aff", fontSize: "12.5px", fontWeight: "500" }}>
-                    ✨ Take quiz
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    borderTop: "1px solid rgba(255, 255, 255, 0.06)",
+                    paddingTop: "12px",
+                    marginTop: "6px",
+                  }}
+                >
+                  <div
+                    onClick={() => navigate(`/dashboard/${item._id}`)}
+                    style={{
+                      color: "#818cf8",
+                      fontSize: "12px",
+                      fontWeight: "600",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    <ThunderboltOutlined /> Take quiz
                   </div>
-                 
+
                   <Popconfirm
-                          title="Delete Subject"
-                          description="Are you sure to delete this Subject?"
-                          onConfirm={(e) => handleDelete(e,item._id)}
-                          okText="Yes"
-                          cancelText="No"
-                          okButtonProps={{ danger: true }}
-                          cancelButtonProps={{
-                            style: {
-                              backgroundColor: "#1e1e38",
-                              borderColor: "#35355e",
-                              color: "#ffffff",
-                            },
-                          }}
-                        >
-                          <button
-                            className="btn btn-sm "
-                            title="delete todo"
-                          >
-                            <i className="fa-solid fa-trash"></i>
-                          </button>
-                        </Popconfirm>
+                    title="Delete Subject"
+                    description="Are you sure you want to delete this folder?"
+                    onConfirm={() => handleDelete(item._id)}
+                    okText="Yes"
+                    cancelText="No"
+                    okButtonProps={{ danger: true }}
+                    cancelButtonProps={{
+                      style: {
+                        backgroundColor: "#1e1e38",
+                        borderColor: "#35355e",
+                        color: "#ffffff",
+                      },
+                    }}
+                  >
+                    <button
+                      type="button"
+                      title="Delete Subject"
+                      style={{
+                        background: "rgba(244, 63, 94, 0.12)",
+                        border: "1px solid rgba(244, 63, 94, 0.25)",
+                        color: "#f87171",
+                        width: "30px",
+                        height: "30px",
+                        borderRadius: "6px",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <DeleteOutlined style={{ fontSize: "13px" }} />
+                    </button>
+                  </Popconfirm>
                 </div>
               </div>
             </Col>

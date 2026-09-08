@@ -8,22 +8,31 @@ import {
   UserOutlined,
   LogoutOutlined,
 } from "@ant-design/icons";
-import { Avatar, Dropdown, Layout, Menu } from "antd";
+import { Avatar, Dropdown, Layout, Menu, Grid } from "antd";
 import { Routes, Route, useNavigate, useLocation, Link } from "react-router-dom";
 import Dashboard from "../../pages/Dashboard";
 import logo from "../../assets/book-icon.webp";
 import Todos from "../../pages/Dashboard/Todos";
-import Profile from "../../pages/Dashboard/Profile"; // 👈 Profile component ka correct relative path check kar lena
+import Profile from "../../pages/Dashboard/Profile";
 import axios from "axios";
 import AIChat from "../../pages/Dashboard/AIChat";
 
 const { Header, Sider, Content } = Layout;
+const { useBreakpoint } = Grid;
 
 const Dashbar = () => {
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const [navAvatar, setNavAvatar] = useState("");
+
+  // Ant Design Breakpoint Hook
+  const screens = useBreakpoint();
+  // md true tab hoga jab screen >= 768px (Tablet / Laptop / Desktop) hogi
+  const isDesktop = screens.md;
+
+  // Jab mobile screen ho to force collapse rakhein
+  const isSiderCollapsed = !isDesktop ? true : collapsed;
 
   const handleLogout = () => {
     localStorage.removeItem("token");
@@ -36,7 +45,9 @@ const Dashbar = () => {
     {
       key: "grp-main",
       type: "group",
-      label: <span className="menu-group-title text-center ms-4">Main</span>,
+      label: isSiderCollapsed ? null : (
+        <span className="menu-group-title text-center ms-4">Main</span>
+      ),
     },
     { key: "/dashboard", icon: <HomeOutlined />, label: "Dashboard" },
     {
@@ -96,17 +107,31 @@ const Dashbar = () => {
       <Sider
         trigger={null}
         collapsible
-        collapsed={collapsed}
+        collapsed={isSiderCollapsed}
+        collapsedWidth={isDesktop ? 80 : 64}
         width={240}
         className="dashbar-sider"
+        style={{
+          overflow: "auto",
+          height: "100vh",
+          position: "sticky",
+          top: 0,
+          left: 0,
+          zIndex: 100,
+          background: "#001529",
+        }}
       >
         <Link to="/dashboard" className="text-center text-decoration-none">
-        <div className="sider-logo d-flex align-items-center gap-2 p-3">
-          <img src={logo} style={{ height: "30px" }} alt="ClassNotes Logo" />
-          {!collapsed && (
-            <span className="fw-bold fs-5 text-white">ClassNotes</span>
-          )}
-        </div>
+          <div
+            className={`sider-logo d-flex align-items-center gap-2 p-3 ${
+              isSiderCollapsed ? "justify-content-center" : ""
+            }`}
+          >
+            <img src={logo} style={{ height: "30px" }} alt="ClassNotes Logo" />
+            {!isSiderCollapsed && (
+              <span className="fw-bold fs-5 text-white">ClassNotes</span>
+            )}
+          </div>
         </Link>
 
         <Menu
@@ -120,13 +145,22 @@ const Dashbar = () => {
 
       {/* Main Screen Layout */}
       <Layout className="dashbar-main">
-        <Header className="dashbar-header d-flex align-items-center justify-content-between px-4 shadow-sm">
-          <button
-            className="btn d-flex align-items-center justify-content-center p-2 border-0"
-            onClick={() => setCollapsed(!collapsed)}
-          >
-            {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-          </button>
+        <Header
+          className="dashbar-header d-flex align-items-center justify-content-between px-3 px-md-4 shadow-sm"
+          style={{ background: "#090b14", borderBottom: "1px solid rgba(255,255,255,0.08)" }}
+        >
+          {/* Toggle button sirf Tablet/Desktop par show hoga */}
+          <div>
+            {isDesktop && (
+              <button
+                className="btn d-flex align-items-center justify-content-center p-2 border-0 text-white"
+                onClick={() => setCollapsed(!collapsed)}
+                style={{ fontSize: "18px", cursor: "pointer" }}
+              >
+                {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+              </button>
+            )}
+          </div>
 
           <div>
             <Dropdown
@@ -203,7 +237,6 @@ const Dashbar = () => {
                 </div>
               )}
             >
-              {/* Dynamic Navbar Avatar */}
               <Avatar
                 size="default"
                 src={navAvatar || undefined}
@@ -219,17 +252,16 @@ const Dashbar = () => {
         </Header>
 
         <Content
-  className="dashbar-content p-4"
-  style={{ backgroundColor: "#02030d", minHeight: "calc(100vh - 64px)" }}
->
-  <Routes>
-    <Route path="todos/*" element={<Todos />} />
-    <Route path="profile" element={<Profile />} />
-    {/* 👈 Yeh line update ho gayi */}
-    <Route path="chat" element={<AIChat />} />
-    <Route path="/*" element={<Dashboard />} />
-  </Routes>
-</Content>
+          className="dashbar-content p-2 p-md-4"
+          style={{ backgroundColor: "#02030d", minHeight: "calc(100vh - 64px)" }}
+        >
+          <Routes>
+            <Route path="todos/*" element={<Todos />} />
+            <Route path="profile" element={<Profile />} />
+            <Route path="chat" element={<AIChat />} />
+            <Route path="/*" element={<Dashboard />} />
+          </Routes>
+        </Content>
       </Layout>
     </Layout>
   );

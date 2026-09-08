@@ -1,5 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
-import { Button, Col, Input, Row, Spin, message, Modal } from "antd";
+import { Button, Col, Input, Row, Spin, message, Modal, Space, Popconfirm } from "antd";
+import ReactMarkdown from "react-markdown";
+import { ConfigProvider, theme } from "antd";
 import {
   SearchOutlined,
   PlusOutlined,
@@ -7,11 +9,14 @@ import {
   EyeOutlined,
   ThunderboltOutlined,
   ExperimentOutlined,
+  CopyOutlined,
+  FileTextOutlined,
 } from "@ant-design/icons";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import AddNoteModal from "./AddNoteModal";
 import PreviewModal from "./PreviewModal";
+import QuizModal from "../../components/QuizModal";
 
 const IndividualCards = () => {
   const { id } = useParams();
@@ -27,6 +32,15 @@ const IndividualCards = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedNoteForPreview, setSelectedNoteForPreview] = useState(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [isQuizOpen, setIsQuizOpen] = useState(false);
+
+  // 👈 Custom Summary Modal State
+  const [summaryData, setSummaryData] = useState({
+    open: false,
+    title: "",
+    chapter: "",
+    content: "",
+  });
 
   // 1. Backend Fetch: Subject Details & Notes
   const fetchSubjectAndNotes = useCallback(async () => {
@@ -61,49 +75,40 @@ const IndividualCards = () => {
     if (id) fetchSubjectAndNotes();
   }, [id, fetchSubjectAndNotes]);
 
-  // 2. AI Summarize Handler (YAHAN DEFINE HOGA)
+  // 2. AI Summarize Handler
   const handleSummarize = async (note) => {
     try {
-      message.loading({ content: "AI is analyzing & summarizing...", key: "sum", duration: 0 });
+      message.loading({ content: `Analyzing & summarizing "${note.title}"...`, key: "sum", duration: 0 });
       const token = localStorage.getItem("token");
 
-      const prompt = `Provide a concise 3-to-4 bullet summary with key exam takeaways for this study topic: "${note.title}".
-Chapter: "${note.chapter || "N/A"}"
-Content details: "${note.content || "N/A"}"`;
-
       const res = await axios.post(
-        "http://localhost:5000/api/ai/ask",
-        {
-          prompt,
-          subject: subject?.name || "",
-        },
+        `http://localhost:5000/api/notes/summarize-pdf/${note._id}`,
+        {},
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
 
-      if (res.data.success) {
+      if (res.data?.success) {
         message.success({ content: "Summary ready!", key: "sum" });
-
-        // Clean popup modal instead of basic alert
-        Modal.info({
-          title: `AI Summary: ${note.title}`,
-          width: 580,
-          centered: true,
-          content: (
-            <div style={{ whiteSpace: "pre-wrap", color: "#d1d5db", marginTop: 12, lineHeight: 1.6 }}>
-              {res.data.reply}
-            </div>
-          ),
-          okText: "Got it",
-          okButtonProps: {
-            style: { background: "#6366f1", borderColor: "#6366f1" },
-          },
+        setSummaryData({
+          open: true,
+          title: note.title,
+          chapter: note.chapter || "General Topic",
+          content: res.data.summary,
+        });
+      } else {
+        message.error({
+          content: res.data?.message || "Failed to generate summary",
+          key: "sum",
         });
       }
     } catch (err) {
       console.error(err);
-      message.error({ content: err.response?.data?.message || "Failed to generate summary", key: "sum" });
+      message.error({
+        content: err.response?.data?.message || "Failed to generate summary",
+        key: "sum",
+      });
     }
   };
 
@@ -164,22 +169,24 @@ Content details: "${note.content || "N/A"}"`;
         </Col>
 
         <Col className="d-flex align-items-center gap-2">
-          <Button
-            className="btn-quiz"
-            icon={<ExperimentOutlined />}
-            onClick={() => message.info("Quiz feature coming soon!")}
-          >
-            Take Quiz
-          </Button>
+          <Space size={"middle"}>
+            <button
+              className="btn-quiz d-flex gap-2 align-items-center justify-content-center"
+              onClick={() => setIsQuizOpen(true)}
+            >
+              <ExperimentOutlined />
+              Take Quiz
+            </button>
 
-          <Button
-            type="primary"
-            className="btn-add-note"
-            icon={<PlusOutlined />}
-            onClick={() => setIsModalOpen(true)}
-          >
-            Add note
-          </Button>
+            <Button
+              type="primary"
+              className="btn-add-note"
+              icon={<PlusOutlined />}
+              onClick={() => setIsModalOpen(true)}
+            >
+              Add note
+            </Button>
+          </Space>
         </Col>
       </Row>
 
@@ -226,10 +233,40 @@ Content details: "${note.content || "N/A"}"`;
               <div className="note-card">
                 <div className="d-flex justify-content-between align-items-start">
                   <h4 className="note-title">{note.title}</h4>
-                  <DeleteOutlined
-                    className="icon-delete"
-                    onClick={() => handleDeleteNote(note._id)}
-                  />
+                  <Popconfirm
+                    title="Delete Note"
+                    description="Are you sure you want to delete this Notes?"
+                    onConfirm={() => handleDeleteNote(notes._id)}
+                    okText="Yes"
+                    cancelText="No"
+                    okButtonProps={{ danger: true }}
+                    cancelButtonProps={{
+                      style: {
+                        backgroundColor: "#1e1e38",
+                        borderColor: "#35355e",
+                        color: "#ffffff",
+                      },
+                    }}
+                  >
+                    <button
+                      type="button"
+                      title="Delete Subject"
+                      style={{
+                        background: "rgba(244, 63, 94, 0.12)",
+                        border: "1px solid rgba(244, 63, 94, 0.25)",
+                        color: "#f87171",
+                        width: "30px",
+                        height: "30px",
+                        borderRadius: "6px",
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        cursor: "pointer",
+                      }}
+                    >
+                      <DeleteOutlined style={{ fontSize: "13px" }} />
+                    </button>
+                  </Popconfirm>
                 </div>
 
                 <p className="note-chapter">{note.chapter}</p>
@@ -262,7 +299,6 @@ Content details: "${note.content || "N/A"}"`;
                     <EyeOutlined /> Preview
                   </button>
 
-                  {/* 👈 YAHAN CONNECT HUA HAI SUMMARIZE BUTTON */}
                   <button
                     className="action-btn"
                     onClick={() => handleSummarize(note)}
@@ -293,6 +329,156 @@ Content details: "${note.content || "N/A"}"`;
         }}
         note={selectedNoteForPreview}
       />
+
+      {/* Quiz Modal */}
+      <QuizModal
+        open={isQuizOpen}
+        onCancel={() => setIsQuizOpen(false)}
+        subjectId={id}
+        subjectName={subject?.name}
+      />
+
+      {/* 👈 Clean Custom AI Summary Modal */}
+      {/* 👈 Clean Dark-Themed AI Summary Modal with Markdown */}
+      <ConfigProvider
+        theme={{
+          algorithm: theme.darkAlgorithm,
+          token: {
+            colorBgElevated: "#0d0f1a",
+            colorText: "#f8fafc",
+            colorPrimary: "#6366f1",
+            borderRadiusLG: 16,
+          },
+        }}
+      >
+        <Modal
+          open={summaryData.open}
+          onCancel={() => setSummaryData((prev) => ({ ...prev, open: false }))}
+          footer={null}
+          centered
+          width={700}
+          destroyOnClose
+          className="quiz-dark-modal"
+          styles={{
+            mask: { backdropFilter: "blur(8px)", backgroundColor: "rgba(3, 7, 18, 0.82)" },
+            content: {
+              backgroundColor: "#0d0f1a",
+              border: "1px solid rgba(255, 255, 255, 0.1)",
+              borderRadius: "16px",
+              padding: "24px",
+              boxShadow: "0 25px 60px rgba(0, 0, 0, 0.85)",
+            },
+            header: {
+              backgroundColor: "transparent",
+              borderBottom: "none",
+            },
+          }}
+          title={
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingRight: "28px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                <div
+                  style={{
+                    width: "40px",
+                    height: "40px",
+                    borderRadius: "10px",
+                    background: "linear-gradient(135deg, #6366f1, #4338ca)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "#fff",
+                    fontSize: "18px",
+                    boxShadow: "0 4px 12px rgba(99, 102, 241, 0.35)",
+                  }}
+                >
+                  <ThunderboltOutlined />
+                </div>
+                <div>
+                  <h4 style={{ margin: 0, fontSize: "16px", color: "#f8fafc", fontWeight: 700 }}>
+                    Exam Review & Summary
+                  </h4>
+                  <span style={{ fontSize: "12px", color: "#94a3b8" }}>
+                    {summaryData.chapter} • {summaryData.title}
+                  </span>
+                </div>
+              </div>
+
+              <Button
+                size="small"
+                icon={<CopyOutlined />}
+                onClick={() => {
+                  navigator.clipboard.writeText(summaryData.content);
+                  message.success("Summary copied to clipboard!");
+                }}
+                style={{
+                  background: "rgba(255, 255, 255, 0.05)",
+                  borderColor: "rgba(255, 255, 255, 0.12)",
+                  color: "#cbd5e1",
+                  borderRadius: "6px",
+                }}
+              >
+                Copy
+              </Button>
+            </div>
+          }
+        >
+          <div style={{ marginTop: "16px" }}>
+            {/* Context Info Banner */}
+            <div
+              style={{
+                background: "rgba(99, 102, 241, 0.1)",
+                border: "1px solid rgba(99, 102, 241, 0.25)",
+                borderRadius: "10px",
+                padding: "10px 14px",
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                marginBottom: "16px",
+              }}
+            >
+              <FileTextOutlined style={{ color: "#818cf8", fontSize: "16px" }} />
+              <span style={{ fontSize: "12.5px", color: "#cbd5e1" }}>
+                Extracted directly from notes and study material using AI summarization.
+              </span>
+            </div>
+
+            {/* Markdown Rendered Content Body */}
+            <div
+              className="summary-markdown-body"
+              style={{
+                background: "#141824",
+                border: "1px solid rgba(255, 255, 255, 0.08)",
+                borderRadius: "12px",
+                padding: "18px 22px",
+                color: "#cbd5e1",
+                fontSize: "14px",
+                lineHeight: 1.7,
+                maxHeight: "420px",
+                overflowY: "auto",
+              }}
+            >
+              <ReactMarkdown>{summaryData.content}</ReactMarkdown>
+            </div>
+
+            {/* Modal Footer */}
+            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "20px" }}>
+              <Button
+                type="primary"
+                size="middle"
+                onClick={() => setSummaryData((prev) => ({ ...prev, open: false }))}
+                style={{
+                  background: "#6366f1",
+                  borderColor: "#6366f1",
+                  fontWeight: 600,
+                  borderRadius: "8px",
+                  padding: "0 24px",
+                }}
+              >
+                Done
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      </ConfigProvider>
     </div>
   );
 };

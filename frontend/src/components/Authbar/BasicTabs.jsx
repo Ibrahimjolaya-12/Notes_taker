@@ -1,10 +1,10 @@
-import './Tabs.scss';
-import { NavLink } from 'react-router-dom';
+import "./Tabs.scss";
+import { NavLink } from "react-router-dom";
 
 const BasicTabs = () => {
   const tabs = [
-    { id: 'login', label: 'Sign in', path: '/auth/login' },
-    { id: 'register', label: 'Sign up', path: '/auth/register' },
+    { id: "login", label: "Sign in", path: "/auth/login" },
+    { id: "register", label: "Sign up", path: "/auth/register" },
   ];
 
   return (
@@ -15,7 +15,7 @@ const BasicTabs = () => {
             key={tab.id}
             to={tab.path}
             className={({ isActive }) =>
-              `auth-tabs__btn ${isActive ? 'auth-tabs__btn--active' : ''}`
+              `auth-tabs__btn ${isActive ? "auth-tabs__btn--active" : ""}`
             }
           >
             {tab.label}

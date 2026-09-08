@@ -1,4 +1,4 @@
-import { Modal, Button, ConfigProvider, message } from "antd";
+import { Modal, Button, ConfigProvider, message, Grid, theme } from "antd";
 import {
   CloseOutlined,
   FilePdfOutlined,
@@ -8,7 +8,12 @@ import {
 } from "@ant-design/icons";
 import axios from "axios";
 
+const { useBreakpoint } = Grid;
+
 const PreviewModal = ({ visible, onClose, note }) => {
+  const screens = useBreakpoint();
+  const isMobile = !screens.sm;
+
   if (!note) return null;
 
   // 1. URL Resolution logic
@@ -40,7 +45,6 @@ const PreviewModal = ({ visible, onClose, note }) => {
     if (url.includes("drive.google.com/file/d/")) {
       return url.replace(/\/view.*$/, "/preview");
     }
-    // PDF toolbar aur fit mode enable karne ke liye
     return `${url}#toolbar=1&navpanes=0&scrollbar=1`;
   };
 
@@ -90,10 +94,13 @@ const PreviewModal = ({ visible, onClose, note }) => {
   return (
     <ConfigProvider
       theme={{
+        algorithm: theme.darkAlgorithm,
         token: {
-          colorBgElevated: "#070716",
+          colorBgElevated: "#080816",
           colorText: "#ffffff",
           colorBorder: "#191b36",
+          colorPrimary: "#6366f1",
+          borderRadiusLG: 14,
         },
       }}
     >
@@ -103,79 +110,203 @@ const PreviewModal = ({ visible, onClose, note }) => {
         footer={null}
         closable={false}
         centered
-        width={900}
-        wrapClassName="dark-preview-modal-overlay"
-        className="custom-preview-modal"
+        width={isMobile ? "96%" : 880}
+        styles={{
+          mask: { backdropFilter: "blur(8px)", backgroundColor: "rgba(3, 7, 18, 0.85)" },
+          content: {
+            backgroundColor: "#080816",
+            border: "1px solid rgba(255, 255, 255, 0.1)",
+            padding: isMobile ? "14px 12px" : "20px 24px",
+            borderRadius: "16px",
+            boxShadow: "0 25px 60px rgba(0,0,0,0.85)",
+          },
+        }}
       >
-        <div className="preview-modal-content">
+        <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
           {/* Header */}
-          <div className="d-flex justify-content-between align-items-start mb-2">
-            <div>
-              <h3 className="note-main-title">{note.title}</h3>
-              <p className="note-sub-desc">{note.content || note.chapter || "Document Viewer"}</p>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "flex-start",
+              borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
+              paddingBottom: "12px",
+              marginBottom: "12px",
+              gap: "10px",
+            }}
+          >
+            <div style={{ minWidth: 0 }}>
+              <h3
+                style={{
+                  margin: 0,
+                  color: "#f8fafc",
+                  fontSize: isMobile ? "16px" : "18px",
+                  fontWeight: 700,
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                {note.title}
+              </h3>
+              <p
+                style={{
+                  margin: "3px 0 0",
+                  color: "#818cf8",
+                  fontSize: "12px",
+                  fontWeight: 500,
+                }}
+              >
+                {note.chapter || "Study Attachment"}
+              </p>
             </div>
-            <CloseOutlined className="btn-close-modal" onClick={onClose} />
+
+            <Button
+              type="text"
+              icon={<CloseOutlined />}
+              onClick={onClose}
+              style={{ color: "#94a3b8", padding: 0 }}
+            />
           </div>
 
           {/* Meta Bar */}
-          <div className="file-info-bar d-flex justify-content-between align-items-center mb-3">
-            <div className="d-flex align-items-center gap-3">
-              <div className="file-type-icon">
+          <div
+            style={{
+              display: "flex",
+              flexDirection: isMobile ? "column" : "row",
+              justifyContent: "space-between",
+              alignItems: isMobile ? "stretch" : "center",
+              gap: "10px",
+              background: "#0e1124",
+              border: "1px solid rgba(255, 255, 255, 0.06)",
+              borderRadius: "10px",
+              padding: "10px 14px",
+              marginBottom: "12px",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0 }}>
+              <div
+                style={{
+                  width: "32px",
+                  height: "32px",
+                  borderRadius: "8px",
+                  background: isPdf ? "rgba(239, 68, 68, 0.15)" : "rgba(99, 102, 241, 0.15)",
+                  color: isPdf ? "#ef4444" : "#818cf8",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "16px",
+                  flexShrink: 0,
+                }}
+              >
                 {isImage ? <FileTextOutlined /> : <FilePdfOutlined />}
               </div>
-              <div>
-                <span className="file-name-text">{getFileName()}</span>
-                <span className="file-type-subtext">
-                  {isGoogleDrive ? "GOOGLE DRIVE FILE" : "ATTACHED DOCUMENT"}
+              <div style={{ minWidth: 0 }}>
+                <span
+                  style={{
+                    color: "#ffffff",
+                    fontSize: "13px",
+                    fontWeight: 600,
+                    display: "block",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  {getFileName()}
+                </span>
+                <span style={{ color: "#64748b", fontSize: "11px", textTransform: "uppercase" }}>
+                  {isGoogleDrive ? "Google Drive Document" : "Attached Study File"}
                 </span>
               </div>
             </div>
 
-            <div className="d-flex align-items-center gap-2">
+            <div style={{ display: "flex", gap: "8px" }}>
               <Button
+                size="small"
                 icon={<ExportOutlined />}
-                className="action-pill-btn"
                 onClick={handleOpenExternal}
                 disabled={!rawUrl}
+                style={{
+                  background: "rgba(255, 255, 255, 0.05)",
+                  borderColor: "rgba(255, 255, 255, 0.12)",
+                  color: "#cbd5e1",
+                  flex: isMobile ? 1 : "initial",
+                  height: "32px",
+                }}
               >
                 Open
               </Button>
               <Button
+                size="small"
+                type="primary"
                 icon={<DownloadOutlined />}
-                className="action-pill-btn"
                 onClick={handleDownload}
                 disabled={!rawUrl}
+                style={{
+                  background: "#6366f1",
+                  borderColor: "#6366f1",
+                  flex: isMobile ? 1 : "initial",
+                  height: "32px",
+                }}
               >
-                Save
+                Download
               </Button>
             </div>
           </div>
 
-          {/* Viewer Area */}
-          <div className="document-viewer-container">
+          {/* Viewer Canvas */}
+          <div
+            style={{
+              height: isMobile ? "65vh" : "70vh",
+              background: "#03040a",
+              border: "1px solid rgba(255, 255, 255, 0.08)",
+              borderRadius: "12px",
+              overflow: "hidden",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
             {rawUrl ? (
               isImage ? (
-                <div className="image-viewer-wrapper">
-                  <img src={rawUrl} alt="Note Attachment" />
+                <div
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    overflow: "auto",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: "10px",
+                  }}
+                >
+                  <img
+                    src={rawUrl}
+                    alt="Attachment Preview"
+                    style={{
+                      maxWidth: "100%",
+                      maxHeight: "100%",
+                      objectFit: "contain",
+                      borderRadius: "6px",
+                    }}
+                  />
                 </div>
               ) : (
-                /* Object tag browser ke native PDF plugin ko force invoke karta hai */
-                <object
-                  data={getEmbedUrl(rawUrl)}
-                  type="application/pdf"
-                  className="pdf-iframe-viewer"
-                >
-                  <iframe
-                    src={getEmbedUrl(rawUrl)}
-                    title="Document Preview"
-                    className="pdf-iframe-viewer"
-                    frameBorder="0"
-                  />
-                </object>
+                <iframe
+                  src={getEmbedUrl(rawUrl)}
+                  title="Document Preview"
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    border: "none",
+                  }}
+                />
               )
             ) : (
-              <div className="no-file-screen">
-                <p>No document attached to this note.</p>
+              <div style={{ textAlign: "center", color: "#64748b", padding: "20px" }}>
+                <FileTextOutlined style={{ fontSize: "36px", marginBottom: "8px" }} />
+                <p style={{ margin: 0, fontSize: "14px" }}>No document attached to this note.</p>
               </div>
             )}
           </div>

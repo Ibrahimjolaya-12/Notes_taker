@@ -12,6 +12,7 @@ import todoRouter from "./src/Routes/Todo.routes.js";
 import avatarRouter from "./src/Routes/Avatar.routes.js";
 import notesRouter from "./src/Routes/Notes.routes.js";
 import aiRouter from "./src/Routes/AI.routes.js";
+import quizRouter from "./src/Routes/Quiz.routes.js"; // Path check kar lena apne folder structure ke mutabiq
 
 import ConnectDB from "./src/Config/db.js";
 
@@ -70,7 +71,7 @@ app.use("/api/subjects", subjectRouter);
 app.use("/api/todos", todoRouter);
 app.use("/api/avatar", avatarRouter);
 app.use("/api/notes", notesRouter);
-
+app.use("/api/quiz", quizRouter);
 // 👈 4. Limiter ko AI router ke sath attach karein
 app.use("/api/ai", aiLimiter, aiRouter);
 

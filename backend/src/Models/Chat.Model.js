@@ -3,8 +3,13 @@ import mongoose from "mongoose";
 const messageSchema = new mongoose.Schema({
   sender: { type: String, enum: ["user", "ai"], required: true },
   text: { type: String, default: "" },
-  mediaUrl: { type: String, default: "" }, // image ya audio ka local path
-  mediaType: { type: String, enum: ["image", "audio", "text"], default: "text" },
+  mediaUrl: { type: String, default: "" },
+  // ✅ Yahan "pdf" aur "doc" add kar diya hai
+  mediaType: { 
+    type: String, 
+    enum: ["image", "audio", "text", "pdf", "doc"], 
+    default: "text" 
+  },
   createdAt: { type: Date, default: Date.now },
 });
 

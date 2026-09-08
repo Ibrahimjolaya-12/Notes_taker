@@ -1,28 +1,113 @@
-    import {  Col, Row, Space } from "antd"
-import { useNavigate } from "react-router-dom"
+import { Col, Row, Grid, Button } from "antd";
+import { ArrowRightOutlined, UserOutlined } from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
 
-    const FrontendPage = () => {
-        const navigate = useNavigate()
-    return (
-        <>
-        <div className="container">
-            <Row className="text-center">
-                <Col span={24} className="d-flex align-items-center justify-content-center mb-3 text-center">
-                <h1 style={{color:"#4A3EE2",fontWeight:"900",fontSize:"60px",width:"50vw",textAlign:"center",marginTop:"100px"}}>All your class notes, organized.</h1>
-                </Col>
-                <Col span={24}>
-                <p style={{color:"#849DB8",fontSize:"18px"}}>Upload PDFs, slides, videos and text. Tag by chapter. Search instantly. Summarize with AI.</p>
-                </Col>
-                <Col span={24} className="py-4">
-                <Space size={"large"}>
-                    <button onClick={()=>{navigate("/auth/register")}} style={{backgroundColor:"#766FFF", color:"black", border:"none", padding:"10px 25px", fontWeight:"600"}} className="rounded-3">Get started free</button>
-                    <button onClick={()=>{navigate("/auth/login")}} style={{backgroundColor:"#000", color:"white", border:"1px solid black", padding:"10px 25px", fontWeight:"600"}} className="rounded-3">I have an account</button>
-                </Space>
-                </Col>
-            </Row>
-        </div>
-        </>
-    )
-    }
+const { useBreakpoint } = Grid;
 
-    export default FrontendPage
+const FrontendPage = () => {
+  const navigate = useNavigate();
+  const screens = useBreakpoint();
+  const isMobile = !screens.sm;
+
+  return (
+    <div
+      className="landing-hero-container"
+      style={{
+        maxWidth: "1140px",
+        margin: "0 auto",
+        padding: isMobile ? "30px 16px 20px" : "60px 20px 40px",
+      }}
+    >
+      <Row justify="center" className="text-center">
+        {/* Main Hero Heading */}
+        <Col xs={24} md={20} lg={18}>
+          <h1
+            style={{
+              color: "#6366f1",
+              fontWeight: 900,
+              fontSize: isMobile ? "32px" : screens.md ? "48px" : "56px",
+              lineHeight: 1.18,
+              textAlign: "center",
+              margin: "0 auto 16px",
+              maxWidth: "800px",
+              letterSpacing: "-0.5px",
+            }}
+          >
+            All your class notes, organized.
+          </h1>
+        </Col>
+
+        {/* Subtitle */}
+        <Col xs={24} sm={20} md={16}>
+          <p
+            style={{
+              color: "#94a3b8",
+              fontSize: isMobile ? "14px" : "17px",
+              lineHeight: 1.6,
+              margin: "0 auto 28px",
+              maxWidth: "620px",
+            }}
+          >
+            Upload PDFs, slides, and notes. Tag by chapter, search instantly, and
+            generate AI summaries and quizzes in one click.
+          </p>
+        </Col>
+
+        {/* Action Buttons (Mobile par full-width stack, Desktop par inline) */}
+        <Col xs={24}>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: isMobile ? "column" : "row",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: "12px",
+              maxWidth: isMobile ? "320px" : "100%",
+              margin: "0 auto",
+            }}
+          >
+            <Button
+              type="primary"
+              size="large"
+              icon={<ArrowRightOutlined />}
+              onClick={() => navigate("/auth/register")}
+              block={isMobile}
+              style={{
+                backgroundColor: "#6366f1",
+                borderColor: "#6366f1",
+                color: "#ffffff",
+                fontWeight: 600,
+                height: isMobile ? "44px" : "48px",
+                padding: "0 28px",
+                borderRadius: "10px",
+                boxShadow: "0 4px 16px rgba(99, 102, 241, 0.4)",
+              }}
+            >
+              Get started free
+            </Button>
+
+            <Button
+              size="large"
+              icon={<UserOutlined />}
+              onClick={() => navigate("/auth/login")}
+              block={isMobile}
+              style={{
+                backgroundColor: "rgba(255, 255, 255, 0.05)",
+                borderColor: "rgba(255, 255, 255, 0.15)",
+                color: "#cbd5e1",
+                fontWeight: 600,
+                height: isMobile ? "44px" : "48px",
+                padding: "0 28px",
+                borderRadius: "10px",
+              }}
+            >
+              I have an account
+            </Button>
+          </div>
+        </Col>
+      </Row>
+    </div>
+  );
+};
+
+export default FrontendPage;

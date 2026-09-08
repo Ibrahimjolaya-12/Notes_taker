@@ -8,6 +8,7 @@ import {
   updateNote,
   deleteNote,
 } from "../Controller/Notes.controller.js";
+import { summarizeNotePDF } from "../Controller/AI.controller.js";
 
 const router = express.Router();
 
@@ -25,5 +26,12 @@ router.put("/:id", auth, upload.single("file"), updateNote);
 
 // 5. Delete note
 router.delete("/:id", auth, deleteNote);
+
+
+
+// individual topic ki summery
+
+
+router.post("/summarize-pdf/:noteId", auth, summarizeNotePDF);
 
 export default router;

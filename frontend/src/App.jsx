@@ -5,15 +5,31 @@ import Routes from "./pages/Routes";
 import ScreenLoader from "./Config/ScreenLoader";
 
 const App = () => {
-  // FIX 1: Initial state true taake shuru mein loader dikhe
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
+    // 1. Agar page pehle hi poori tarah load ho chuka ho
+    if (document.readyState === "complete") {
       setLoading(false);
-    }, 3000);
+      return;
+    }
 
-    return () => clearTimeout(timer);
+    // 2. Real-time window load event listener
+    const handleLoad = () => {
+      setLoading(false);
+    };
+
+    window.addEventListener("load", handleLoad);
+
+    // 3. Fallback safety timer (agar koi third-party asset slow ho to max 2.5s baad open ho jaye)
+    const fallbackTimer = setTimeout(() => {
+      setLoading(false);
+    }, 2500);
+
+    return () => {
+      window.removeEventListener("load", handleLoad);
+      clearTimeout(fallbackTimer);
+    };
   }, []);
 
   return (

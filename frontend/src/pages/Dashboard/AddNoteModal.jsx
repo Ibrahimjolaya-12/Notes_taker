@@ -1,14 +1,18 @@
 import { useState } from "react";
-import { Modal, Form, Input, Button, Row, Col, message, ConfigProvider, Select } from "antd";
-import { UploadOutlined, CloseOutlined, LinkOutlined } from "@ant-design/icons";
+import { Modal, Form, Input, Button, Row, Col, message, ConfigProvider, Select, Grid, theme } from "antd";
+import { UploadOutlined, CloseOutlined, LinkOutlined, FileAddOutlined } from "@ant-design/icons";
 import axios from "axios";
 
 const { TextArea } = Input;
+const { useBreakpoint } = Grid;
 
 const AddNoteModal = ({ visible, onClose, subjectId, onNoteCreated }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [fileList, setFileList] = useState([]);
+
+  const screens = useBreakpoint();
+  const isMobile = !screens.sm;
 
   const handleFinish = async (values) => {
     try {
@@ -19,7 +23,7 @@ const AddNoteModal = ({ visible, onClose, subjectId, onNoteCreated }) => {
       formData.append("title", values.title);
       formData.append("topic", values.topic || "");
       formData.append("chapter", values.chapter || "");
-      formData.append("tags", values.tags || "general"); // 👈 Selected tag
+      formData.append("tags", values.tags || "general");
       formData.append("content", values.content || "");
       formData.append("driveLink", values.driveLink || "");
 
@@ -38,7 +42,7 @@ const AddNoteModal = ({ visible, onClose, subjectId, onNoteCreated }) => {
         }
       );
 
-      if (res.data.success) {
+      if (res.data?.success) {
         message.success("Note created successfully!");
         form.resetFields();
         setFileList([]);
@@ -53,71 +57,105 @@ const AddNoteModal = ({ visible, onClose, subjectId, onNoteCreated }) => {
     }
   };
 
+  const handleClose = () => {
+    form.resetFields();
+    setFileList([]);
+    onClose();
+  };
+
   return (
     <ConfigProvider
       theme={{
+        algorithm: theme.darkAlgorithm,
         token: {
           colorBgElevated: "#080816",
           colorBgContainer: "#03030d",
           colorText: "#ffffff",
           colorTextHeading: "#ffffff",
-          colorTextPlaceholder: "#4b4a62",
+          colorTextPlaceholder: "#64748b",
           colorBorder: "#1e2652",
-          controlItemBgActive: "#1c234a",
-          controlItemBgHover: "#11263c",
+          colorPrimary: "#6366f1",
+          borderRadiusLG: 14,
         },
       }}
     >
       <Modal
         open={visible}
-        onCancel={onClose}
+        onCancel={handleClose}
         footer={null}
         closable={false}
         centered
-        width={520}
-        wrapClassName="dark-modal-overlay"
-        className="custom-dark-modal"
+        width={isMobile ? "94%" : 540}
+        styles={{
+          mask: { backdropFilter: "blur(6px)", backgroundColor: "rgba(0, 0, 0, 0.78)" },
+          content: {
+            backgroundColor: "#080816",
+            border: "1px solid rgba(255, 255, 255, 0.1)",
+            padding: isMobile ? "16px" : "24px",
+            boxShadow: "0 20px 50px rgba(0,0,0,0.8)",
+          },
+        }}
       >
         <div className="new-note-container">
           {/* Header */}
-          <div className="d-flex justify-content-between align-items-center mb-3">
-            <h3 className="modal-title">New note</h3>
-            <CloseOutlined className="close-btn" onClick={onClose} />
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "18px",
+              borderBottom: "1px solid rgba(255,255,255,0.08)",
+              paddingBottom: "12px",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <FileAddOutlined style={{ color: "#818cf8", fontSize: "18px" }} />
+              <h3 style={{ margin: 0, color: "#f8fafc", fontSize: isMobile ? "16px" : "18px", fontWeight: 700 }}>
+                New Note
+              </h3>
+            </div>
+            <Button
+              type="text"
+              icon={<CloseOutlined />}
+              onClick={handleClose}
+              style={{ color: "#94a3b8" }}
+            />
           </div>
 
           <Form
             form={form}
             layout="vertical"
             onFinish={handleFinish}
-            initialValues={{ tags: "general" }} // 👈 Default value set ki hai
+            initialValues={{ tags: "general" }}
+            requiredMark={false}
           >
             {/* Title */}
             <Form.Item
-              label={<span className="field-label">Title</span>}
+              label={<span style={{ color: "#cbd5e1", fontWeight: 600 }}>Title</span>}
               name="title"
               rules={[{ required: true, message: "Please enter note title!" }]}
             >
-              <Input className="dark-field highlight-field" placeholder="Enter title" />
+              <Input placeholder="Enter title..." size="large" />
             </Form.Item>
 
-            {/* Topic & Chapter */}
-            <Row gutter={16}>
-              <Col span={12}>
-                <Form.Item label={<span className="field-label">Topic</span>} name="topic">
-                  <Input className="dark-field" placeholder="Topic name" />
+            {/* Topic & Chapter Responsive Grid */}
+            <Row gutter={[12, 0]}>
+              <Col xs={24} sm={12}>
+                <Form.Item label={<span style={{ color: "#cbd5e1", fontWeight: 600 }}>Topic</span>} name="topic">
+                  <Input placeholder="Topic name" size="large" />
                 </Form.Item>
               </Col>
-              <Col span={12}>
-                <Form.Item label={<span className="field-label">Chapter</span>} name="chapter">
-                  <Input className="dark-field" placeholder="Chapter 1" />
+              <Col xs={24} sm={12}>
+                <Form.Item label={<span style={{ color: "#cbd5e1", fontWeight: 600 }}>Chapter</span>} name="chapter">
+                  <Input placeholder="e.g., Chapter 1" size="large" />
                 </Form.Item>
               </Col>
             </Row>
 
             {/* Tags (Dropdown Select) */}
-            <Form.Item label={<span className="field-label">Tag</span>} name="tags">
+            <Form.Item label={<span style={{ color: "#cbd5e1", fontWeight: 600 }}>Tag</span>} name="tags">
               <Select
-                className="dark-select"
+                size="large"
                 popupClassName="dark-select-dropdown"
                 options={[
                   { label: "Midterm (mid)", value: "mid" },
@@ -129,13 +167,23 @@ const AddNoteModal = ({ visible, onClose, subjectId, onNoteCreated }) => {
             </Form.Item>
 
             {/* Content */}
-            <Form.Item label={<span className="field-label">Content</span>} name="content">
-              <TextArea rows={4} className="dark-field dark-textarea" placeholder="Write note content here..." />
+            <Form.Item label={<span style={{ color: "#cbd5e1", fontWeight: 600 }}>Content</span>} name="content">
+              <TextArea rows={4} placeholder="Write or paste note key points here..." />
             </Form.Item>
 
             {/* File Upload */}
-            <Form.Item label={<span className="field-label">File (PDF, image, video, PPT, text)</span>}>
-              <div className="custom-file-input">
+            <Form.Item label={<span style={{ color: "#cbd5e1", fontWeight: 600 }}>Attachment (PDF, image, doc)</span>}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  background: "#03030d",
+                  border: "1px dashed rgba(255, 255, 255, 0.15)",
+                  borderRadius: "8px",
+                  padding: "8px 12px",
+                }}
+              >
                 <input
                   type="file"
                   id="note-file"
@@ -146,10 +194,31 @@ const AddNoteModal = ({ visible, onClose, subjectId, onNoteCreated }) => {
                     }
                   }}
                 />
-                <label htmlFor="note-file" className="file-btn">
+                <label
+                  htmlFor="note-file"
+                  style={{
+                    backgroundColor: "rgba(99, 102, 241, 0.15)",
+                    color: "#818cf8",
+                    padding: "6px 12px",
+                    borderRadius: "6px",
+                    cursor: "pointer",
+                    fontSize: "13px",
+                    fontWeight: 500,
+                    margin: 0,
+                    whiteSpace: "nowrap",
+                  }}
+                >
                   Choose File
                 </label>
-                <span className="file-name">
+                <span
+                  style={{
+                    color: "#94a3b8",
+                    fontSize: "12.5px",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}
+                >
                   {fileList.length > 0 ? fileList[0].name : "No file chosen"}
                 </span>
               </div>
@@ -158,34 +227,54 @@ const AddNoteModal = ({ visible, onClose, subjectId, onNoteCreated }) => {
             {/* Google Drive Link */}
             <Form.Item
               label={
-                <span className="field-label">
+                <span style={{ color: "#cbd5e1", fontWeight: 600 }}>
                   <LinkOutlined style={{ marginRight: 6 }} />
                   Or paste a Google Drive link
                 </span>
               }
               name="driveLink"
               extra={
-                <span className="field-hint">
+                <span style={{ color: "#64748b", fontSize: "11.5px" }}>
                   File must be shared as "Anyone with the link can view".
                 </span>
               }
             >
-              <Input
-                className="dark-field"
-                placeholder="https://drive.google.com/file/d/.../view"
-              />
+              <Input size="large" placeholder="https://drive.google.com/file/d/.../view" />
             </Form.Item>
 
-            {/* Save Button */}
-            <div className="d-flex justify-content-end mt-4">
+            {/* Actions */}
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                gap: "10px",
+                marginTop: "20px",
+              }}
+            >
+              <Button
+                onClick={handleClose}
+                block={isMobile}
+                style={{
+                  background: "transparent",
+                  borderColor: "rgba(255, 255, 255, 0.15)",
+                  color: "#cbd5e1",
+                }}
+              >
+                Cancel
+              </Button>
               <Button
                 type="primary"
                 htmlType="submit"
                 loading={loading}
                 icon={<UploadOutlined />}
-                className="btn-save"
+                block={isMobile}
+                style={{
+                  background: "#6366f1",
+                  borderColor: "#6366f1",
+                  fontWeight: 600,
+                }}
               >
-                Save
+                Save Note
               </Button>
             </div>
           </Form>
