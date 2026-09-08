@@ -4,6 +4,7 @@ import dns from "node:dns";
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
+import rateLimit from "express-rate-limit"; // 👈 1. Import karein
 
 import userRouter from "./src/Routes/Auth.routes.js";
 import subjectRouter from "./src/Routes/Subject.routes.js";
@@ -16,6 +17,9 @@ import ConnectDB from "./src/Config/db.js";
 
 dotenv.config();
 const app = express();
+
+// Proxy configuration (Production hosting ke liye lazmi hai)
+app.set("trust proxy", 1); // 👈 2. Add karein
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -36,8 +40,18 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// 👈 YE LINE MISSING THI: Browser ko uploads folder expose karo inline PDF display ke sath
-// server.js ke andar purani static line hatao aur yeh likho:
+// 👈 3. Rate Limiter instance banayein
+const aiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20, // 15 minute me maximum 20 requests per IP
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: "Bohat zyada requests bhej di hain, baraye meherbani 15 minute baad koshish karein.",
+  },
+});
+
 app.use(
   "/uploads",
   express.static(path.join(__dirname, "public/temp"), {
@@ -56,7 +70,9 @@ app.use("/api/subjects", subjectRouter);
 app.use("/api/todos", todoRouter);
 app.use("/api/avatar", avatarRouter);
 app.use("/api/notes", notesRouter);
-app.use("/api/ai", aiRouter);
+
+// 👈 4. Limiter ko AI router ke sath attach karein
+app.use("/api/ai", aiLimiter, aiRouter);
 
 app.get("/", (req, res) => {
   res.send("Server is running ...");
