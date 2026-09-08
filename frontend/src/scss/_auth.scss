@@ -1,0 +1,170 @@
+.auth-wrapper {
+  position: relative; // 👈 Top-left logo position ke liye zaroori
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at center, #0f0c29 0%, #08071a 50%, #030209 100%);
+  padding: 1.5rem;
+}
+
+// 👈 Top-Left Logo Styling
+.auth-brand {
+  position: absolute;
+  top: 28px;
+  left: 36px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  img {
+    height: 38px;
+    width: 38px;
+    object-fit: contain;
+    border-radius: 8px;
+  }
+
+  span {
+    color: #ffffff;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+}
+
+.auth-card {
+  background: #090919;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 40px -10px rgba(112, 0, 255, 0.35);
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 420px;
+
+  .auth-title {
+    color: #ffffff;
+    margin-bottom: 4px !important;
+    text-align: center;
+  }
+
+  .auth-subtitle {
+    font-size: 13px;
+    color: #a1a1aa;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .ant-form-item {
+    margin-bottom: 14px;
+  }
+
+  .ant-form-item-label > label {
+    color: #e4e4e7 !important;
+    font-size: 13px;
+  }
+
+
+    &::placeholder {
+      color: #52525b !important;
+    }
+
+    &:hover {
+      border-color: #6c63ff !important;
+    }
+
+    &:focus,
+    &-focused {
+      border-color: #6c63ff !important;
+      box-shadow: 0 0 0 2px rgba(108, 99, 255, 0.2) !important;
+    }
+
+    input {
+      background-color: transparent !important;
+      border: none !important;
+      outline: none !important;
+      box-shadow: none !important;
+      color: #ffffff !important;
+
+      &::placeholder {
+        color: #52525b !important;
+      }
+
+      &:focus {
+        border: none !important;
+        outline: none !important;
+        box-shadow: none !important;
+      }
+    }
+  }
+
+  .ant-input-password-icon {
+    color: #a1a1aa !important;
+
+    &:hover {
+      color: #ffffff !important;
+    }
+  }
+
+  .btn-submit {
+    background: linear-gradient(90deg, #6c63ff 0%, #7d5fff 100%);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-weight: 600;
+    height: 42px;
+    margin-top: 10px;
+
+    &:hover {
+      opacity: 0.9;
+    }
+  }
+
+
+  // Inputs and Password Box (Exact Dark Tint)
+  .ant-input,
+  .ant-input-affix-wrapper {
+    background-color: #0d0c1d !important;
+    border: 1px solid #1e1d32 !important;
+    border-radius: 8px !important;
+    color: #ffffff !important;
+    box-shadow: none !important;
+
+    &::placeholder {
+      color: #63627a !important;
+    }
+
+    &:hover {
+      border-color: #3b3765 !important;
+    }
+
+    &:focus {
+      border-color: #6c63ff !important;
+      box-shadow: 0 0 0 2px rgba(108, 99, 255, 0.15) !important;
+    }
+
+    // Andar ka input bilkul transparent taake double box na bane
+    input {
+      background-color: transparent !important;
+      border: none !important;
+      outline: none !important;
+      box-shadow: none !important;
+      color: #ffffff !important;
+
+      &::placeholder {
+        color: #63627a !important;
+      }
+
+      &:focus {
+        border: none !important;
+        outline: none !important;
+        box-shadow: none !important;
+      }
+    }
+  }
+
+  // Ant Design specific active/focus state wrapper ke liye
+  .ant-input-affix-wrapper-focused {
+    border-color: #6c63ff !important;
+    box-shadow: 0 0 0 2px rgba(108, 99, 255, 0.15) !important;
+  }

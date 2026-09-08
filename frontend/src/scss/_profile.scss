@@ -1,0 +1,196 @@
+.dark-select-dropdown {
+  background-color: #080816 !important;
+  border: 1px solid #1c234a !important;
+  border-radius: 8px !important;
+}
+
+.dark-select-dropdown .ant-select-item {
+  color: #ffffff !important;
+  transition: background 0.2s;
+}
+
+.dark-select-dropdown .ant-select-item-option-active {
+  background-color: #11263c !important;
+}
+
+.dark-select-dropdown .ant-select-item-option-selected {
+  background-color: #1c234a !important;
+  color: #7c82ff !important;
+}
+
+
+
+
+
+.profile-page-wrapper {
+  min-height: 100vh;
+  background-color: #060814;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+}
+
+.profile-loader {
+  min-height: 100vh;
+  background: #060814;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-container {
+  width: 100%;
+  max-width: 540px;
+
+  .profile-heading {
+    color: #ffffff;
+    font-size: 26px;
+    font-weight: 700;
+    margin-bottom: 18px;
+  }
+
+  .profile-card {
+    background: #0d1026;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+
+    .avatar-section {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 24px;
+
+      .avatar-circle {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        overflow: hidden;
+        background-color: #161b3d;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid #2e3875;
+
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+      }
+
+      .avatar-info {
+        h4 {
+          color: #ffffff;
+          margin: 0;
+          font-size: 18px;
+          font-weight: 600;
+        }
+        span {
+          color: #9ca3af;
+          font-size: 13px;
+          display: block;
+          margin-bottom: 8px;
+        }
+        .btn-upload {
+          background: transparent;
+          padding-top: 5px;
+          color: #ffffff;
+          border: 1px solid #2e3875;
+          border-radius: 8px;
+          font-size: 12px;
+          height: 32px;
+        }
+      }
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+
+      label {
+        color: #d1d5db;
+        font-size: 13px;
+        font-weight: 500;
+        display: block;
+        margin-bottom: 6px;
+      }
+
+      .dark-input {
+        background-color: #070a1e;
+        border: 1px solid #1e2652;
+        color: #ffffff;
+        border-radius: 8px;
+        height: 42px;
+
+        &.disabled-input {
+          color: #6b7280;
+          cursor: not-allowed;
+        }
+      }
+
+      .dark-select {
+        width: 100%;
+        height: 42px;
+
+        .ant-select-selector {
+          background-color: #070a1e !important;
+          border: 1px solid #1e2652 !important;
+          color: #ffffff !important;
+          border-radius: 8px !important;
+          height: 42px !important;
+          display: flex;
+          align-items: center;
+        }
+
+        .ant-select-arrow {
+          color: #7b7a94;
+        }
+      }
+    }
+
+    .profile-badges {
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding-top: 16px;
+      margin-bottom: 22px;
+      display: flex;
+      gap: 16px;
+      color: #9ca3af;
+      font-size: 12px;
+
+      div {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+    }
+
+    .btn-save-profile {
+      background-color: #827aff;
+      border-color: #827aff;
+      color: #000000;
+      font-weight: 600;
+      border-radius: 8px;
+      height: 40px;
+      padding: 0 24px;
+    }
+  }
+}
+
+/* Antd Dropdown Menu Dark Theme */
+.dark-select-dropdown {
+  background-color: #0d1026 !important;
+  border: 1px solid #1e2652;
+
+  .ant-select-item {
+    color: #ffffff;
+
+    &-option-selected {
+      background-color: #1c234a !important;
+    }
+    &-option-active {
+      background-color: #161b3d !important;
+    }
+  }
+}

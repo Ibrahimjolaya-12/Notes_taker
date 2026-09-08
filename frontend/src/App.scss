@@ -1,0 +1,82 @@
+@import "./scss/bootstrap";
+@import "./scss/auth";
+@import "./scss/frontendPage";
+@import "./scss/frontNav";
+@import "./scss/featureCard";
+@import "./scss/Frontfooter";
+@import "./scss/dashboard";
+@import "./scss/todoCard";
+@import "./scss/viewTodo";
+@import "./scss/screenLoader";
+@import "./scss/profile";
+@import "./scss/notesCard";
+@import "./scss/addNoteModal";
+@import "./scss/previewModal";
+@import "./scss/aiChat";
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Outfit:wght@100..900&display=swap');
+
+* {
+  font-family: "Inter", sans-serif;
+  color: white;
+}
+
+
+#roots{
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+main{
+    flex: 1 0 auto;
+}
+
+
+button{
+  transition: 0.5s ease-in-out;
+}
+button:hover{
+transform: translateY(-5px);
+}
+
+
+Button{
+  transition: 0.5s ease-in-out;
+}
+Button:hover{
+transform: translateY(-5px);
+}
+
+.Tag{
+  transition: 0.5s ease-in-out;
+}
+.Tag:hover{
+  transform: translateY(-5px);
+  font-size: 12px;
+}
+
+
+
+/* Ant Design Message Icons Fix */
+.ant-message-notice-content .anticon {
+  display: inline-flex !important;
+  align-items: center !important;
+  font-size: 16px !important;
+  vertical-align: middle !important;
+}
+
+/* Success Icon Green */
+.ant-message-custom-content.ant-message-success .anticon {
+  color: #52c41a !important;
+}
+
+/* Error Icon Red */
+.ant-message-custom-content.ant-message-error .anticon {
+  color: #ff4d4f !important;
+}
+
+/* Warning Icon Yellow */
+.ant-message-custom-content.ant-message-warning .anticon {
+  color: #faad14 !important;
+}

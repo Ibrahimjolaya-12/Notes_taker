@@ -1,0 +1,44 @@
+.auth-tabs {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-bottom: 24px;
+
+  &__nav {
+    display: flex;
+    width: 100%;
+    background-color: #121124;
+    border: 1px solid #232238;
+    border-radius: 10px;
+    padding: 4px;
+    gap: 4px;
+  }
+
+  &__btn {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 0;
+    border: none;
+    background: transparent;
+    color: #9494a8;
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    border-radius: 7px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+
+    &:hover:not(&--active) {
+      color: #ffffff;
+    }
+
+    &--active {
+      background-color: #030209;
+      color: #ffffff;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+    }
+  }
+}

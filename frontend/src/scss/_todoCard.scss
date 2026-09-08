@@ -1,0 +1,222 @@
+/* Card Container */
+.custom-todo-container {
+  width: 100%;
+  max-width: 480px;
+  margin: 40px auto;
+  background-color: #0e0e1f !important;
+  border: 1px solid #1a1a32 !important;
+  border-radius: 16px !important;
+  padding: 24px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+
+  .form-heading {
+    color: #ffffff;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+  }
+
+  /* Labels & Required Asterisk */
+  .ant-form-item-label > label {
+    color: #ffffff !important;
+    font-size: 0.9rem;
+    font-weight: 500;
+
+    &.ant-form-item-required:not(.ant-form-item-required-mark-optional)::before {
+      color: #ff4d4f !important;
+    }
+  }
+
+  .ant-form-item {
+    margin-bottom: 18px;
+  }
+
+  /* All Inputs, DatePicker, Select Box, TextArea */
+  .ant-input,
+  .ant-picker,
+  .ant-select-selector,
+  .ant-input-textarea textarea {
+    background-color: #080816 !important;
+    border: 1px solid #1e1e38 !important;
+    border-radius: 8px !important;
+    color: #ffffff !important;
+    font-size: 0.9rem;
+
+    &::placeholder {
+      color: #474a6b !important;
+    }
+
+    &:hover {
+      border-color: #35355e !important;
+    }
+
+    &:focus,
+    &.ant-picker-focused,
+    &.ant-select-focused .ant-select-selector {
+      border-color: #5448db !important;
+      box-shadow: 0 0 0 2px rgba(84, 72, 219, 0.2) !important;
+    }
+  }
+
+  /* DatePicker Specifics */
+  .ant-picker {
+    width: 100%;
+    .ant-picker-input > input {
+      color: #ffffff !important;
+      &::placeholder {
+        color: #474a6b !important;
+      }
+    }
+    .ant-picker-suffix {
+      color: #474a6b;
+    }
+  }
+
+  /* Select Box Specifics */
+  .ant-select {
+    width: 100%;
+    .ant-select-arrow {
+      color: #474a6b;
+    }
+    .ant-select-selection-item {
+      color: #ffffff !important;
+      line-height: 38px;
+    }
+  }
+
+  /* TextArea Count */
+  .ant-input-data-count {
+    color: #474a6b !important;
+  }
+
+  /* Button wrapper */
+  .btn-wrapper {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 20px;
+
+    .submit-btn {
+      min-width: 110px;
+      height: 40px;
+      background-color: #5448db !important;
+      border: none !important;
+      border-radius: 8px !important;
+      color: #ffffff !important;
+      font-weight: 500;
+      font-size: 0.95rem;
+
+      &:hover {
+        background-color: #4337cb !important;
+      }
+    }
+  }
+}
+
+/* DatePicker Popup Overlay (Dropdown Body) */
+.dark-picker-popup {
+  .ant-picker-panel-container {
+    background: #0e0e1f !important;
+    border: 1px solid #1a1a32 !important;
+  }
+
+  .ant-picker-header,
+  .ant-picker-footer {
+    color: #ffffff !important;
+    border-bottom: 1px solid #1a1a32 !important;
+    button {
+      color: #a0a0c0 !important;
+    }
+  }
+
+  .ant-picker-content th {
+    color: #474a6b !important;
+  }
+
+  .ant-picker-cell {
+    color: #a0a0c0 !important;
+    &-in-view {
+      color: #ffffff !important;
+    }
+    &-selected .ant-picker-cell-inner {
+      background-color: #5448db !important;
+    }
+  }
+}
+
+/* Select Dropdown Overlay */
+.dark-select-popup {
+  background-color: #0e0e1f !important;
+  border: 1px solid #1a1a32 !important;
+
+  .ant-select-item {
+    color: #a0a0c0 !important;
+
+    &-option-selected {
+      background-color: rgba(84, 72, 219, 0.25) !important;
+      color: #ffffff !important;
+    }
+    &-option-active {
+      background-color: #171733 !important;
+    }
+  }
+}
+
+/* Select Box Specifics (Fixed Dark Background) */
+  .ant-select {
+    width: 100%;
+
+    // Selector container
+    .ant-select-selector {
+      background-color: #080816 !important;
+      border: 1px solid #1e1e38 !important;
+      border-radius: 8px !important;
+      box-shadow: none !important;
+      height: 40px !important;
+      display: flex;
+      align-items: center;
+    }
+
+    &:hover .ant-select-selector {
+      border-color: #35355e !important;
+    }
+
+    &.ant-select-focused .ant-select-selector {
+      border-color: #5448db !important;
+      box-shadow: 0 0 0 2px rgba(84, 72, 219, 0.2) !important;
+    }
+
+    .ant-select-arrow {
+      color: #474a6b !important;
+    }
+
+    // Selected text color
+    .ant-select-selection-item {
+      color: #ffffff !important;
+      line-height: 38px !important;
+    }
+
+    // Placeholder if empty
+    .ant-select-selection-placeholder {
+      color: #474a6b !important;
+      line-height: 38px !important;
+    }
+  }
+
+
+  /* Direct AntD v5 Select Box Override */
+.custom-todo-container div.ant-select-outlined .ant-select-selector,
+.custom-todo-container .ant-select .ant-select-selector {
+  background-color: #080816 !important;
+  background: #080816 !important;
+  border: 1px solid #1e1e38 !important;
+  border-radius: 8px !important;
+  color: #ffffff !important;
+}
+
+.custom-todo-container .ant-select .ant-select-selection-item {
+  color: #ffffff !important;
+}
+
+.custom-todo-container .ant-select .ant-select-arrow {
+  color: #474a6b !important;
+}

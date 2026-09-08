@@ -1,0 +1,12 @@
+.front-footer {
+  width: 100%;
+  border-top: 1px solid rgba(255, 255, 255, 0.08); // Dark theme matching divider
+  padding: 15px 0 0 0;
+  background: transparent;
+
+  .footer-text {
+    color: #6d6c85;
+    font-size: 13px;
+    letter-spacing: 0.01em;
+  }
+}

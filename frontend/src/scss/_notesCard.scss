@@ -1,0 +1,148 @@
+.notesCard{
+    background-color: #0A0B28;
+    border: 1px solid white;
+    width: 450px;
+}
+
+
+.individual-notes-wrapper {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 10px 15px;
+
+  .subject-badge {
+    color: #7b7a94;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 2px;
+  }
+
+  .subject-name {
+    color: #ffffff;
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0;
+  }
+
+  .btn-quiz {
+    background: rgba(13, 12, 29, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #ffffff;
+    height: 38px;
+    border-radius: 8px;
+    font-weight: 500;
+  }
+
+  .btn-add-note {
+    background: #827aff;
+    border-color: #827aff;
+    color: #ffffff;
+    height: 38px;
+    border-radius: 8px;
+    font-weight: 600;
+  }
+
+  .dark-search-bar {
+    background: rgba(13, 12, 29, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    color: #ffffff;
+    height: 42px;
+
+    input {
+      background: transparent !important;
+      color: #ffffff !important;
+    }
+  }
+
+  .filter-tag-pill {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #9ca3af;
+    font-size: 12px;
+    padding: 3px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+
+    &.active {
+      background: #827aff;
+      color: #ffffff;
+      border-color: #827aff;
+    }
+  }
+
+  .empty-notes-box {
+    text-align: center;
+    padding: 60px 0;
+    color: #7b7a94;
+    border: 1px dashed rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+  }
+
+  .note-card {
+    background: rgba(13, 12, 29, 0.45);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: 18px 20px;
+
+    .note-title {
+      color: #ffffff;
+      font-size: 16px;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .icon-delete {
+      color: #ef4444;
+      cursor: pointer;
+      font-size: 14px;
+      transition: opacity 0.2s;
+
+      &:hover {
+        opacity: 0.8;
+      }
+    }
+
+    .note-chapter {
+      color: #7b7a94;
+      font-size: 12px;
+      margin: 4px 0 10px 0;
+    }
+
+    .note-desc {
+      color: #d1d5db;
+      font-size: 13px;
+      margin-bottom: 12px;
+    }
+
+    .note-tag-badge {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.06);
+      color: #9ca3af;
+      font-size: 11px;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+
+    .action-btn {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: #ffffff;
+      font-size: 12px;
+      border-radius: 6px;
+      padding: 5px 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.08);
+      }
+    }
+  }
+}

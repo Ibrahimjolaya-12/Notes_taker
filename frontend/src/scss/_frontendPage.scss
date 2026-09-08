@@ -1,0 +1,10 @@
+.frontend-wrapper {
+  position: relative; // 👈 Top-left logo position ke liye zaroori
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: radial-gradient(circle at center, #0f0c29 0%, #08071a 50%, #030209 100%);
+  padding: 1.5rem;
+}

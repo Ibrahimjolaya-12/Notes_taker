@@ -1,0 +1,101 @@
+.custom-dark-modal {
+  .ant-modal-content {
+    background-color: #050512 !important;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 24px 28px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
+  }
+
+  .new-note-container {
+    .modal-title {
+      color: #ffffff;
+      font-size: 18px;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .close-btn {
+      color: #6b6a82;
+      font-size: 14px;
+      cursor: pointer;
+      &:hover {
+        color: #ffffff;
+      }
+    }
+
+    .ant-form-item-label > label {
+      color: #ffffff !important;
+      font-size: 13px !important;
+      font-weight: 500;
+    }
+
+    .dark-field {
+      background-color: #03030d !important;
+      border: 1px solid #16152b !important;
+      color: #ffffff !important;
+      border-radius: 8px;
+      height: 40px;
+
+      &::placeholder {
+        color: #4b4a62;
+      }
+
+      &:focus, &:hover {
+        border-color: #4338ca !important;
+      }
+
+      &.highlight-field {
+        border-color: #312e81 !important;
+      }
+    }
+
+    .dark-textarea {
+      height: auto !important;
+      resize: vertical;
+    }
+
+    .custom-file-input {
+      background-color: #03030d;
+      border: 1px solid #16152b;
+      border-radius: 8px;
+      padding: 6px 10px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      .file-btn {
+        background: #111025;
+        border: 1px solid #232242;
+        color: #ffffff;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 5px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+
+      .file-name {
+        color: #6b6a82;
+        font-size: 13px;
+      }
+    }
+
+    .field-hint {
+      color: #6b6a82;
+      font-size: 12px;
+      display: block;
+      margin-top: 4px;
+    }
+
+    .btn-save {
+      background-color: #7857ff !important;
+      border-color: #7857ff !important;
+      color: #ffffff !important;
+      font-weight: 600;
+      height: 38px;
+      border-radius: 8px;
+      padding: 0 24px;
+    }
+  }
+}

@@ -1,0 +1,80 @@
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at center, #0f0c29 0%, #08071a 50%, #030209 100%) !important;
+  min-height: 100vh;
+  width: 100vw; /* Screen overflow aur safe full-width ke liye */
+}
+.loader {
+  --color-1: #919189;
+  --color-2: #FFFFFF;
+  --color-3: #646464;
+  --color-4: rgba(0, 0, 0, 0.25);
+  --color-5: #fff;
+  --size: 0.75px;
+
+  width: calc(200 * var(--size));
+  height: calc(140 * var(--size));
+  background: var(--color-1);
+  box-sizing: border-box;
+  position: relative;
+  border-radius: calc(8 * var(--size));
+  perspective: calc(1000 * var(--size));
+}
+
+.loader:before {
+  content: '';
+  position: absolute;
+  left: calc(10 * var(--size));
+  right: calc(10 * var(--size));
+  top: calc(10 * var(--size));
+  bottom: calc(10 * var(--size));
+  border-radius: calc(8 * var(--size));
+  background: var(--color-2) no-repeat;
+  background-size: calc(60 * var(--size)) calc(10 * var(--size));
+  background-image:
+    linear-gradient(var(--color-3) calc(100 * var(--size)), transparent 0),
+    linear-gradient(var(--color-3) calc(100 * var(--size)), transparent 0),
+    linear-gradient(var(--color-3) calc(100 * var(--size)), transparent 0),
+    linear-gradient(var(--color-3) calc(100 * var(--size)), transparent 0),
+    linear-gradient(var(--color-3) calc(100 * var(--size)), transparent 0),
+    linear-gradient(var(--color-3) calc(100 * var(--size)), transparent 0);
+
+  background-position:
+    calc(15 * var(--size)) calc(30 * var(--size)),
+    calc(15 * var(--size)) calc(60 * var(--size)),
+    calc(15 * var(--size)) calc(90 * var(--size)),
+    calc(105 * var(--size)) calc(30 * var(--size)),
+    calc(105 * var(--size)) calc(60 * var(--size)),
+    calc(105 * var(--size)) calc(90 * var(--size));
+  box-shadow: 0 0 calc(10 * var(--size)) var(--color-4);
+}
+.loader:after {
+  content: '';
+  position: absolute;
+  width: calc(50% - calc(10 * var(--size)));
+  right: calc(10 * var(--size));
+  top: calc(10 * var(--size));
+  bottom: calc(10 * var(--size));
+  border-radius: calc(8 * var(--size));
+  background: var(--color-5) no-repeat;
+  background-size: calc(60 * var(--size)) calc(10 * var(--size));
+  background-image:
+    linear-gradient(var(--color-3) calc(100 * var(--size)), transparent 0),
+    linear-gradient(var(--color-3) calc(100 * var(--size)), transparent 0),
+    linear-gradient(var(--color-3) calc(100 * var(--size)), transparent 0);
+  background-position:
+    50% calc(30 * var(--size)),
+    50% calc(60 * var(--size)),
+    50% calc(90 * var(--size));
+  transform: rotateY(0deg);
+  transform-origin: left center;
+  animation: paging 1s linear infinite;
+}
+
+@keyframes paging {
+  to {
+    transform: rotateY(-180deg);
+  }
+}
