@@ -46,19 +46,6 @@ const PreviewModal = ({ visible, onClose, note }) => {
     return `${note.title || "document"}.pdf`;
   };
 
-  // Safe Google Viewer Embed for Cloudinary PDFs
-  const getEmbedUrl = (url) => {
-    if (!url) return "";
-    if (url.includes("drive.google.com/file/d/")) {
-      return url.replace(/\/view.*$/, "/preview");
-    }
-    if (isPdf && !isImage) {
-      // Google Docs Viewer bypasses Cloudinary iframe restrictions completely
-      return `https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true`;
-    }
-    return `${url}#toolbar=1&navpanes=0&scrollbar=1`;
-  };
-
   const handleOpenExternal = () => {
     if (!rawUrl) return;
     window.open(rawUrl, "_blank", "noopener,noreferrer");
@@ -301,9 +288,22 @@ const PreviewModal = ({ visible, onClose, note }) => {
                     }}
                   />
                 </div>
+              ) : isPdf ? (
+                <object
+                  data={rawUrl}
+                  type="application/pdf"
+                  style={{ width: "100%", height: "100%" }}
+                >
+                  <div style={{ textAlign: "center", padding: "40px", color: "#94a3b8" }}>
+                    <p style={{ marginBottom: "12px" }}>Direct PDF preview is restricted by browser policy.</p>
+                    <Button type="primary" onClick={handleOpenExternal} style={{ background: "#6366f1" }}>
+                      Open Document in New Tab
+                    </Button>
+                  </div>
+                </object>
               ) : (
                 <iframe
-                  src={getEmbedUrl(rawUrl)}
+                  src={rawUrl}
                   title="Document Preview"
                   style={{
                     width: "100%",
