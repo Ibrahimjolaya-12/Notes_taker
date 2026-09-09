@@ -65,8 +65,8 @@ const AIChat = ({ currentSubject }) => {
         const headers = { Authorization: `Bearer ${token}` };
 
         const [avatarRes, historyRes] = await Promise.allSettled([
-          axios.get("https://class-notes-backend.vercel.app/api/avatar/me", { headers }),
-          axios.get("https://class-notes-backend.vercel.app/api/ai/history", { headers }),
+          axios.get("http://localhost:5000/api/avatar/me", { headers }),
+          axios.get("http://localhost:5000/api/ai/history", { headers }),
         ]);
 
         if (isMounted) {
@@ -215,7 +215,7 @@ const AIChat = ({ currentSubject }) => {
       }
 
       const res = await axios.post(
-        "https://class-notes-backend.vercel.app/api/ai/ask",
+        "http://localhost:5000/api/ai/ask",
         formData,
         {
           headers: {
@@ -245,7 +245,7 @@ const AIChat = ({ currentSubject }) => {
   const handleClearHistory = async () => {
     try {
       const token = localStorage.getItem("token");
-      await axios.delete("https://class-notes-backend.vercel.app/api/ai/clear", {
+      await axios.delete("http://localhost:5000/api/ai/clear", {
         headers: { Authorization: `Bearer ${token}` },
       });
 

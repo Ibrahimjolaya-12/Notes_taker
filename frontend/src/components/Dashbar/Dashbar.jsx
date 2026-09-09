@@ -91,7 +91,7 @@ const Dashbar = () => {
       try {
         const token = localStorage.getItem("token");
         if (!token) return;
-        const res = await axios.get("https://class-notes-backend.vercel.app/api/avatar/me", {
+        const res = await axios.get("http://localhost:5000/api/avatar/me", {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (res.data.success && res.data.avatar) {

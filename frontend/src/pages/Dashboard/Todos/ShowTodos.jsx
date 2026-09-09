@@ -56,7 +56,7 @@ const ShowTodos = () => {
       }
 
       const res = await axios.get(
-        `https://class-notes-backend.vercel.app/api/todos/getAllTodos?status=${status}`,
+        `http://localhost:5000/api/todos/getAllTodos?status=${status}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -80,7 +80,7 @@ const ShowTodos = () => {
   const handleDelete = async (id) => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.delete(`https://class-notes-backend.vercel.app/api/todos/${id}`, {
+      const res = await axios.delete(`http://localhost:5000/api/todos/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

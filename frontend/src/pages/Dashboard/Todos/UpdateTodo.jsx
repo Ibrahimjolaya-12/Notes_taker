@@ -45,7 +45,7 @@ const UpdateTodo = () => {
           return;
         }
 
-        const res = await axios.get(`https://class-notes-backend.vercel.app/api/todos/${id}`, {
+        const res = await axios.get(`http://localhost:5000/api/todos/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -92,7 +92,7 @@ const UpdateTodo = () => {
       };
 
       const res = await axios.put(
-        `https://class-notes-backend.vercel.app/api/todos/${id}`,
+        `http://localhost:5000/api/todos/${id}`,
         payload,
         {
           headers: {

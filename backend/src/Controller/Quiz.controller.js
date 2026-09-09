@@ -43,7 +43,6 @@
 
 //     const sanitizedContext = combinedText.slice(0, 6000);
 
-//     // 👈 Active Model with native JSON response mode
 //     const chatCompletion = await groq.chat.completions.create({
 //       messages: [
 //         {
@@ -105,7 +104,6 @@
 //     });
 //   }
 // };
-
 
 
 
@@ -177,9 +175,9 @@ Do NOT return markdown backticks. Return raw valid JSON only.`,
           content: `Generate exactly ${count} MCQs based on this study content:\n\n${sanitizedContext}`,
         },
       ],
-      model: "llama-3.3-70b-versatile",
+      model: "openai/gpt-oss-120b",
       temperature: 0.1,
-      max_tokens: 2048,
+      max_completion_tokens: 2048,
       response_format: { type: "json_object" },
     });
 

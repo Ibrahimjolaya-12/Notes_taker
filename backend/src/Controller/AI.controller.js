@@ -35,7 +35,7 @@
 //         mediaType = "image";
 //       }
 
-//       mediaUrl = `http://localhost:5000/uploads/${req.file.filename}`;
+//       mediaUrl = `https://class-notes-backend.vercel.app/uploads/${req.file.filename}`;
 //     }
 
 //     const systemInstruction = `
@@ -255,6 +255,8 @@
 
 
 
+
+
 import Groq from "groq-sdk";
 import fs from "fs";
 import path from "path";
@@ -302,6 +304,7 @@ Rules:
 2. If document content is provided, prioritize answering directly based on that context.
 3. Keep answers clear, well-structured, concise, and easy to read. Use Markdown headers and bullet points.
 4. "Muhammad Ibrahim Tahir" is your developer.
+5. "Main Muhammad Zohaib Shazada" is not the founder or participant in this project.
 ${subject ? `The user is currently studying the subject: ${subject}.` : ""}
     `.trim();
 
@@ -312,9 +315,9 @@ ${subject ? `The user is currently studying the subject: ${subject}.` : ""}
         { role: "system", content: systemInstruction },
         { role: "user", content: userFinalPrompt },
       ],
-      model: "llama-3.3-70b-versatile",
+      model: "openai/gpt-oss-20b",
       temperature: 0.3,
-      max_tokens: 1024,
+      max_completion_tokens: 1024,
     });
 
     const replyText = chatCompletion.choices[0]?.message?.content || "No response generated.";
@@ -451,9 +454,9 @@ Output Format (strict Markdown):
           content: promptText,
         },
       ],
-      model: "llama-3.3-70b-versatile",
+      model: "openai/gpt-oss-20b",
       temperature: 0.2,
-      max_tokens: 800,
+      max_completion_tokens: 800,
     });
 
     const summary = chatCompletion.choices[0]?.message?.content || "No summary generated.";
