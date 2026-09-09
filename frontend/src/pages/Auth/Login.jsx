@@ -7,6 +7,8 @@ import { useNavigate } from "react-router-dom"
 const { Title, Text } = Typography
 const { useBreakpoint } = Grid
 
+const BACKEND_URL = "https://class-notes-backend.vercel.app"
+
 const Login = () => {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
@@ -28,7 +30,13 @@ const Login = () => {
   const onFinish = async (values) => {
     setLoading(true)
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/login", values)
+      const sanitizedValues = {
+        ...values,
+        email: values.email?.trim().toLowerCase(),
+      }
+      const res = await axios.post(`${BACKEND_URL}/api/auth/login`, sanitizedValues, {
+        withCredentials: true,
+      })
       if (res.data.success) {
         localStorage.setItem("token", res.data.token)
         if (res.data.user) {
@@ -50,12 +58,13 @@ const Login = () => {
   const handleSendOTP = async (values) => {
     setForgotLoading(true)
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/forgot-password", {
-        email: values.email,
+      const email = values.email?.trim().toLowerCase()
+      const res = await axios.post(`${BACKEND_URL}/api/auth/forgot-password`, { email }, {
+        withCredentials: true,
       })
       if (res.data.success) {
         message.success(res.data.message || "Reset OTP sent to your email!")
-        setResetEmail(values.email)
+        setResetEmail(email)
         setForgotStep("reset")
       }
     } catch (error) {
@@ -70,11 +79,15 @@ const Login = () => {
   const handleResetPassword = async (values) => {
     setForgotLoading(true)
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/reset-password", {
-        email: resetEmail,
-        otp: values.otp,
-        newPassword: values.newPassword,
-      })
+      const res = await axios.post(
+        `${BACKEND_URL}/api/auth/reset-password`,
+        {
+          email: resetEmail,
+          otp: values.otp,
+          newPassword: values.newPassword,
+        },
+        { withCredentials: true }
+      )
       if (res.data.success) {
         message.success(res.data.message || "Password reset successful! Please log in.")
         closeForgotModal()
@@ -97,7 +110,6 @@ const Login = () => {
 
   return (
     <>
-      {/* 👈 Autofill background fix injection */}
       <style>{`
         input:-webkit-autofill,
         input:-webkit-autofill:hover, 
@@ -129,6 +141,9 @@ const Login = () => {
               ]}
             >
               <Input
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck="false"
                 prefix={<MailOutlined style={{ color: "#64748b" }} />}
                 placeholder="Enter your email"
                 size="large"
@@ -268,6 +283,9 @@ const Login = () => {
                   ]}
                 >
                   <Input
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck="false"
                     prefix={<MailOutlined style={{ color: "#64748b" }} />}
                     placeholder="student@university.edu"
                     size="large"

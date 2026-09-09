@@ -7,6 +7,8 @@ import { useNavigate } from "react-router-dom"
 const { Title } = Typography
 const { useBreakpoint } = Grid
 
+const BACKEND_URL = "https://class-notes-backend.vercel.app"
+
 const Register = () => {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
@@ -18,7 +20,14 @@ const Register = () => {
   const onFinish = async (values) => {
     try {
       setLoading(true)
-      const res = await axios.post("http://localhost:5000/api/auth/register", values)
+      const sanitizedValues = {
+        name: values.name?.trim(),
+        email: values.email?.trim().toLowerCase(),
+        password: values.password,
+      }
+      const res = await axios.post(`${BACKEND_URL}/api/auth/register`, sanitizedValues, {
+        withCredentials: true,
+      })
       if (res.data.success) {
         message.success(res.data.message || "Registered successfully!")
         form.resetFields()
@@ -32,7 +41,6 @@ const Register = () => {
     }
   }
 
-  // Consistent dark field style
   const darkInputStyle = {
     backgroundColor: "#060713",
     borderColor: "rgba(255, 255, 255, 0.12)",
@@ -41,7 +49,6 @@ const Register = () => {
 
   return (
     <>
-      {/* 👈 Browser Autofill background fix injection */}
       <style>{`
         input:-webkit-autofill,
         input:-webkit-autofill:hover, 
@@ -92,6 +99,9 @@ const Register = () => {
               ]}
             >
               <Input
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck="false"
                 prefix={<MailOutlined style={{ color: "#64748b" }} />}
                 placeholder="student@university.edu"
                 size="large"
