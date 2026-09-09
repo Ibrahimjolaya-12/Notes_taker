@@ -1,4 +1,4 @@
-import { Modal, Button, ConfigProvider, message, Grid, theme } from "antd";
+import { Modal, Button, ConfigProvider, message, Grid } from "antd";
 import {
   CloseOutlined,
   FilePdfOutlined,
@@ -21,18 +21,11 @@ const PreviewModal = ({ visible, onClose, note }) => {
 
   if (!note) return null;
 
-  let rawUrl = note.fileUrl || note.driveLink || "";
-  
-  if (rawUrl.startsWith("http://localhost:5000") || rawUrl.startsWith("https://class-notes-backend.vercel.app")) {
-    const pathPart = rawUrl.replace(/^https?:\/\/[^/]+/, "");
-    rawUrl = `${BACKEND_URL}${pathPart}`;
-  } else if (rawUrl.startsWith("/uploads")) {
-    rawUrl = `${BACKEND_URL}${rawUrl}`;
-  } else if (rawUrl && !rawUrl.startsWith("http") && !rawUrl.includes("drive.google.com")) {
-    rawUrl = `${BACKEND_URL}/uploads/${rawUrl}`;
-  }
+  // Direct backend native streaming link
+  const fileStreamUrl = note._id ? `${BACKEND_URL}/api/notes/view-file/${note._id}` : (note.fileUrl || "");
+  const rawUrl = note.fileUrl || note.driveLink || "";
 
-  const isPdf = rawUrl.toLowerCase().endsWith(".pdf") || rawUrl.includes("drive.google.com") || rawUrl.includes("cloudinary.com");
+  const isPdf = rawUrl.toLowerCase().endsWith(".pdf") || rawUrl.includes("cloudinary.com") || rawUrl.includes("drive.google.com");
   const isImage = /\.(jpg|jpeg|png|webp|gif|svg)$/i.test(rawUrl);
   const isGoogleDrive = rawUrl.includes("drive.google.com");
 
@@ -46,40 +39,18 @@ const PreviewModal = ({ visible, onClose, note }) => {
     return `${note.title || "document"}.pdf`;
   };
 
-  // Google Docs Viewer wrapper forces Cloudinary PDFs to display nicely in iframe without errors
-  const getEmbedUrl = (url) => {
-    if (!url) return "";
-    if (url.includes("drive.google.com/file/d/")) {
-      return url.replace(/\/view.*$/, "/preview");
-    }
-    if (isPdf && !isImage && !url.includes("docs.google.com")) {
-      return `https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true`;
-    }
-    return url;
-  };
-
   const handleOpenExternal = () => {
-    if (!rawUrl) return;
-    window.open(rawUrl, "_blank", "noopener,noreferrer");
+    if (!fileStreamUrl) return;
+    window.open(fileStreamUrl, "_blank", "noopener,noreferrer");
   };
 
   const handleDownload = async () => {
-    if (!rawUrl) return;
-
-    if (isGoogleDrive) {
-      const driveMatch = rawUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
-      if (driveMatch && driveMatch[1]) {
-        return window.open(`https://drive.google.com/uc?export=download&id=${driveMatch[1]}`, "_blank");
-      }
-      return window.open(rawUrl, "_blank");
-    }
-
+    if (!fileStreamUrl) return;
     try {
-      message.loading({ content: "Downloading...", key: "download" });
-      const response = await axios.get(rawUrl, { responseType: "blob" });
-      const blob = new Blob([response.data], { type: response.headers["content-type"] || "application/pdf" });
+      message.loading({ content: "Downloading...", key: "dl" });
+      const response = await axios.get(fileStreamUrl, { responseType: "blob" });
+      const blob = new Blob([response.data], { type: isPdf ? "application/pdf" : "image/jpeg" });
       const blobUrl = window.URL.createObjectURL(blob);
-
       const link = document.createElement("a");
       link.href = blobUrl;
       link.setAttribute("download", getFileName());
@@ -87,28 +58,20 @@ const PreviewModal = ({ visible, onClose, note }) => {
       link.click();
       link.remove();
       window.URL.revokeObjectURL(blobUrl);
-      message.success({ content: "Downloaded!", key: "download" });
-    } catch (error) {
-      console.error("Download Error:", error);
-      const link = document.createElement("a");
-      link.href = rawUrl;
-      link.target = "_blank";
-      link.download = getFileName();
-      link.click();
-      message.destroy("download");
+      message.success({ content: "Downloaded!", key: "dl" });
+    } catch (err) {
+      window.open(fileStreamUrl, "_blank");
+      message.destroy("dl");
     }
   };
 
   return (
     <ConfigProvider
       theme={{
-        algorithm: theme.darkAlgorithm,
         token: {
           colorBgElevated: "#080816",
           colorText: "#ffffff",
           colorBorder: "#191b36",
-          colorPrimary: "#6366f1",
-          borderRadiusLG: 14,
         },
       }}
     >
@@ -131,7 +94,7 @@ const PreviewModal = ({ visible, onClose, note }) => {
         }}
       >
         <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-          {/* Header */}
+          {/* 1. Header (Matches Demo) */}
           <div
             style={{
               display: "flex",
@@ -157,15 +120,8 @@ const PreviewModal = ({ visible, onClose, note }) => {
               >
                 {note.title}
               </h3>
-              <p
-                style={{
-                  margin: "3px 0 0",
-                  color: "#818cf8",
-                  fontSize: "12px",
-                  fontWeight: 500,
-                }}
-              >
-                {note.chapter || "Study Attachment"}
+              <p style={{ margin: "3px 0 0", color: "#818cf8", fontSize: "12px", fontWeight: 500 }}>
+                {note.content || note.chapter || "Document Viewer"}
               </p>
             </div>
 
@@ -177,7 +133,7 @@ const PreviewModal = ({ visible, onClose, note }) => {
             />
           </div>
 
-          {/* Meta Bar */}
+          {/* 2. File Bar (Matches Demo Pill Bar) */}
           <div
             style={{
               display: "flex",
@@ -195,15 +151,15 @@ const PreviewModal = ({ visible, onClose, note }) => {
             <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0 }}>
               <div
                 style={{
-                  width: "32px",
-                  height: "32px",
+                  width: "34px",
+                  height: "34px",
                   borderRadius: "8px",
-                  background: isPdf ? "rgba(239, 68, 68, 0.15)" : "rgba(99, 102, 241, 0.15)",
-                  color: isPdf ? "#ef4444" : "#818cf8",
+                  background: isPdf ? "rgba(99, 102, 241, 0.2)" : "rgba(239, 68, 68, 0.2)",
+                  color: isPdf ? "#818cf8" : "#ef4444",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  fontSize: "16px",
+                  fontSize: "17px",
                   flexShrink: 0,
                 }}
               >
@@ -224,7 +180,7 @@ const PreviewModal = ({ visible, onClose, note }) => {
                   {getFileName()}
                 </span>
                 <span style={{ color: "#64748b", fontSize: "11px", textTransform: "uppercase" }}>
-                  {isGoogleDrive ? "Google Drive Document" : "Attached Study File"}
+                  {isGoogleDrive ? "GOOGLE DRIVE FILE" : isPdf ? "PDF DOCUMENT" : "ATTACHED DOCUMENT"}
                 </span>
               </div>
             </div>
@@ -234,13 +190,12 @@ const PreviewModal = ({ visible, onClose, note }) => {
                 size="small"
                 icon={<ExportOutlined />}
                 onClick={handleOpenExternal}
-                disabled={!rawUrl}
                 style={{
                   background: "rgba(255, 255, 255, 0.05)",
                   borderColor: "rgba(255, 255, 255, 0.12)",
                   color: "#cbd5e1",
-                  flex: isMobile ? 1 : "initial",
                   height: "32px",
+                  borderRadius: "6px",
                 }}
               >
                 Open
@@ -250,20 +205,20 @@ const PreviewModal = ({ visible, onClose, note }) => {
                 type="primary"
                 icon={<DownloadOutlined />}
                 onClick={handleDownload}
-                disabled={!rawUrl}
                 style={{
                   background: "#6366f1",
                   borderColor: "#6366f1",
-                  flex: isMobile ? 1 : "initial",
                   height: "32px",
+                  borderRadius: "6px",
+                  fontWeight: 600,
                 }}
               >
-                Download
+                Save
               </Button>
             </div>
           </div>
 
-          {/* Viewer Canvas */}
+          {/* 3. Document Viewer Canvas (Native Browser PDF Viewer) */}
           <div
             style={{
               height: isMobile ? "65vh" : "70vh",
@@ -276,41 +231,23 @@ const PreviewModal = ({ visible, onClose, note }) => {
               justifyContent: "center",
             }}
           >
-            {rawUrl ? (
+            {fileStreamUrl ? (
               isImage ? (
-                <div
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    overflow: "auto",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    padding: "10px",
-                  }}
-                >
-                  <img
-                    src={rawUrl}
-                    alt="Attachment Preview"
-                    style={{
-                      maxWidth: "100%",
-                      maxHeight: "100%",
-                      objectFit: "contain",
-                      borderRadius: "6px",
-                    }}
-                  />
+                <div style={{ width: "100%", height: "100%", overflow: "auto", display: "flex", alignItems: "center", justifyContent: "center", padding: "10px" }}>
+                  <img src={fileStreamUrl} alt="Preview" style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", borderRadius: "6px" }} />
                 </div>
               ) : (
-                <iframe
-                  src={getEmbedUrl(rawUrl)}
-                  title="Document Preview"
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    border: "none",
-                    backgroundColor: "#ffffff",
-                  }}
-                />
+                <object
+                  data={`${fileStreamUrl}#toolbar=1&navpanes=0&scrollbar=1`}
+                  type="application/pdf"
+                  style={{ width: "100%", height: "100%", border: "none" }}
+                >
+                  <iframe
+                    src={`${fileStreamUrl}#toolbar=1&navpanes=0&scrollbar=1`}
+                    title="Document Preview"
+                    style={{ width: "100%", height: "100%", border: "none", backgroundColor: "#ffffff" }}
+                  />
+                </object>
               )
             ) : (
               <div style={{ textAlign: "center", color: "#64748b", padding: "20px" }}>
