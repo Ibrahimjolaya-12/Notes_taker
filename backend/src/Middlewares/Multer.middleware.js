@@ -1,8 +1,15 @@
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import os from "os";
 
-const uploadDir = "./public/temp";
+// Vercel serverless environment check
+const isServerless = process.env.VERCEL || process.env.NODE_ENV === "production";
+
+// Vercel par os.tmpdir() (/tmp) writable hota hai, local par public/temp
+const uploadDir = isServerless
+  ? path.join(os.tmpdir(), "temp")
+  : path.join(process.cwd(), "public/temp");
 
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
