@@ -23,7 +23,7 @@ const { useBreakpoint } = Grid;
 
 const defaultWelcomeMessage = {
   sender: "ai",
-  text: "Assalam-o-Alaikum! Main aapka **ClassNotes AI** study partner hoon. Kisi bhi subject ke concept, uploaded PDF documents, notes ya assignment preparation ke mutabiq poochein.",
+  text: "Assalam-o-Alaikum! I am your ClassNotes AI study partner. Feel free to ask about any subject concept, uploaded PDF documents, notes, or assignment preparation.",
 };
 
 const AIChat = ({ currentSubject }) => {
