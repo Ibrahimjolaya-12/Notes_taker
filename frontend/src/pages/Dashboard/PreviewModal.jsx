@@ -11,7 +11,7 @@ import axios from "axios";
 const { useBreakpoint } = Grid;
 
 const BACKEND_URL =
-  process.env.NODE_ENV === "production" || window.location.hostname !== "localhost"
+  import.meta.env.MODE === "production" || window.location.hostname !== "localhost"
     ? "https://class-notes-backend.vercel.app"
     : "http://localhost:5000";
 
