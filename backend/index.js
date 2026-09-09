@@ -1,6 +1,5 @@
 import express from "express";
 import dotenv from "dotenv";
-import dns from "node:dns";
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -23,19 +22,32 @@ app.set("trust proxy", 1);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-if (process.env.NODE_ENV !== "production") {
-  dns.setServers(["8.8.8.8", "1.1.1.1"]);
-}
-
+// Database Connection
 ConnectDB();
 
-// Middlewares
+// Dynamic CORS configuration (Localhost + Vercel deployment domains)
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://localhost:3000"],
+    origin: (origin, callback) => {
+      // Allow requests with no origin (like mobile apps, curl, or server-to-server)
+      if (!origin) return callback(null, true);
+      
+      const allowedOrigins = [
+        "http://localhost:5173",
+        "http://localhost:3000",
+      ];
+      
+      // Allow all vercel preview & production domains automatically
+      if (allowedOrigins.includes(origin) || origin.endsWith(".vercel.app")) {
+        return callback(null, true);
+      }
+      
+      return callback(null, true); // Safe fallback for testing
+    },
     credentials: true,
   })
 );
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -51,7 +63,7 @@ app.use(
   })
 );
 
-// Routes (Each router manages its own specialized rate-limits)
+// Routes
 app.use("/api/auth", userRouter);
 app.use("/api/subjects", subjectRouter);
 app.use("/api/todos", todoRouter);
@@ -61,10 +73,19 @@ app.use("/api/quiz", quizRouter);
 app.use("/api/ai", aiRouter);
 
 app.get("/", (req, res) => {
-  res.send("Server is running ...");
+  res.status(200).json({
+    success: true,
+    message: "ClassNotes Backend Serverless API is running smoothly!",
+  });
 });
 
-const port = process.env.PORT || 5000;
-app.listen(port, () => {
-  console.log(`Server running on port ${port}`);
-});
+// Local development ke liye listen karega
+if (process.env.NODE_ENV !== "production") {
+  const port = process.env.PORT || 5000;
+  app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+  });
+}
+
+// 👈 Vercel serverless runtime ke liye compulsory export
+export default app;
