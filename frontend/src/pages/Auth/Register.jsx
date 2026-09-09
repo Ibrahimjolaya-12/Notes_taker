@@ -32,8 +32,28 @@ const Register = () => {
     }
   }
 
+  // Consistent dark field style
+  const darkInputStyle = {
+    backgroundColor: "#060713",
+    borderColor: "rgba(255, 255, 255, 0.12)",
+    color: "#ffffff",
+  }
+
   return (
     <>
+      {/* 👈 Browser Autofill background fix injection */}
+      <style>{`
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover, 
+        input:-webkit-autofill:focus, 
+        input:-webkit-autofill:active {
+          -webkit-box-shadow: 0 0 0 1000px #060713 inset !important;
+          -webkit-text-fill-color: #ffffff !important;
+          transition: background-color 5000s ease-in-out 0s;
+          caret-color: #ffffff;
+        }
+      `}</style>
+
       <Title
         level={3}
         className="auth-title"
@@ -55,8 +75,9 @@ const Register = () => {
             >
               <Input
                 prefix={<UserOutlined style={{ color: "#64748b" }} />}
-                placeholder="Muhammad Ibrahim"
+                placeholder="Enter your name ..."
                 size="large"
+                style={darkInputStyle}
               />
             </Form.Item>
           </Col>
@@ -74,6 +95,7 @@ const Register = () => {
                 prefix={<MailOutlined style={{ color: "#64748b" }} />}
                 placeholder="student@university.edu"
                 size="large"
+                style={darkInputStyle}
               />
             </Form.Item>
           </Col>
@@ -91,6 +113,7 @@ const Register = () => {
                 prefix={<LockOutlined style={{ color: "#64748b" }} />}
                 placeholder="••••••••"
                 size="large"
+                style={darkInputStyle}
               />
             </Form.Item>
           </Col>
@@ -117,6 +140,7 @@ const Register = () => {
                 prefix={<LockOutlined style={{ color: "#64748b" }} />}
                 placeholder="••••••••"
                 size="large"
+                style={darkInputStyle}
               />
             </Form.Item>
           </Col>

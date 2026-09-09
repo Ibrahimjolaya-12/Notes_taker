@@ -8,19 +8,17 @@ const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 export const generateSubjectQuiz = async (req, res) => {
   try {
     const { subjectId } = req.params;
-    const count = Math.min(Math.max(parseInt(req.body.count, 10) || 5, 1), 20);
+    const count = Math.min(Math.max(parseInt(req.body.count, 10) || 5, 1), 15);
 
-    // 1. Subject ke notes find karo
     const notes = await Note.find({ subject: subjectId }).lean();
 
     if (!notes || notes.length === 0) {
       return res.status(404).json({
         success: false,
-        message: "Is subject mein koi notes nahi miley. Pehle notes upload karein.",
+        message: "Please add or upload notes in related subject first",
       });
     }
 
-    // 2. Parallel PDF text extraction (Fast & Non-blocking)
     const textExtractionPromises = notes.map(async (note) => {
       let extracted = "";
       if (note.fileUrl && note.fileUrl.endsWith(".pdf")) {
@@ -43,9 +41,9 @@ export const generateSubjectQuiz = async (req, res) => {
       });
     }
 
-    const sanitizedContext = combinedText.slice(0, 10000);
+    const sanitizedContext = combinedText.slice(0, 6000);
 
-    // 3. Groq API Call with Active Model
+    // 👈 Active Model with native JSON response mode
     const chatCompletion = await groq.chat.completions.create({
       messages: [
         {
@@ -70,7 +68,8 @@ Do NOT return markdown backticks. Return raw valid JSON only.`,
         },
       ],
       model: "openai/gpt-oss-120b",
-      temperature: 0.2,
+      temperature: 0.1,
+      max_completion_tokens: 2048,
       response_format: { type: "json_object" },
     });
 

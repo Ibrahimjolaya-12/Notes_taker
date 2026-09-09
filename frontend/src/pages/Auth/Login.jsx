@@ -17,7 +17,7 @@ const Login = () => {
 
   // Forgot Password States
   const [forgotModalOpen, setForgotModalOpen] = useState(false)
-  const [forgotStep, setForgotStep] = useState("email") // "email" | "reset"
+  const [forgotStep, setForgotStep] = useState("email")
   const [forgotLoading, setForgotLoading] = useState(false)
   const [resetEmail, setResetEmail] = useState("")
 
@@ -60,7 +60,7 @@ const Login = () => {
       }
     } catch (error) {
       console.error(error)
-      message.error(error.response?.data?.message || "Failed to send reset code.")
+      message.error("Please wait for developer action")
     } finally {
       setForgotLoading(false)
     }
@@ -81,7 +81,7 @@ const Login = () => {
       }
     } catch (error) {
       console.error(error)
-      message.error(error.response?.data?.message || "Failed to reset password.")
+      message.error("Please wait for developer action")
     } finally {
       setForgotLoading(false)
     }
@@ -97,6 +97,19 @@ const Login = () => {
 
   return (
     <>
+      {/* 👈 Autofill background fix injection */}
+      <style>{`
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover, 
+        input:-webkit-autofill:focus, 
+        input:-webkit-autofill:active {
+          -webkit-box-shadow: 0 0 0 1000px #060713 inset !important;
+          -webkit-text-fill-color: #ffffff !important;
+          transition: background-color 5000s ease-in-out 0s;
+          caret-color: #ffffff;
+        }
+      `}</style>
+
       <Title level={3} className="auth-title" style={{ margin: "0 0 4px", color: "#f8fafc" }}>
         Welcome Back
       </Title>
@@ -119,6 +132,11 @@ const Login = () => {
                 prefix={<MailOutlined style={{ color: "#64748b" }} />}
                 placeholder="Enter your email"
                 size="large"
+                style={{
+                  backgroundColor: "#060713",
+                  borderColor: "rgba(255, 255, 255, 0.12)",
+                  color: "#ffffff",
+                }}
               />
             </Form.Item>
           </Col>
@@ -134,6 +152,11 @@ const Login = () => {
                 prefix={<LockOutlined style={{ color: "#64748b" }} />}
                 placeholder="••••••••"
                 size="large"
+                style={{
+                  backgroundColor: "#060713",
+                  borderColor: "rgba(255, 255, 255, 0.12)",
+                  color: "#ffffff",
+                }}
               />
             </Form.Item>
           </Col>
@@ -194,6 +217,7 @@ const Login = () => {
           open={forgotModalOpen}
           onCancel={closeForgotModal}
           footer={null}
+          closable={false}
           centered
           width={isMobile ? "92%" : 460}
           destroyOnClose
@@ -247,6 +271,11 @@ const Login = () => {
                     prefix={<MailOutlined style={{ color: "#64748b" }} />}
                     placeholder="student@university.edu"
                     size="large"
+                    style={{
+                      backgroundColor: "#060713",
+                      borderColor: "rgba(255, 255, 255, 0.12)",
+                      color: "#ffffff",
+                    }}
                   />
                 </Form.Item>
 
@@ -279,7 +308,15 @@ const Login = () => {
                     placeholder="123456"
                     size="large"
                     maxLength={6}
-                    style={{ letterSpacing: "4px", textAlign: "center", fontWeight: 700, fontSize: "18px" }}
+                    style={{
+                      backgroundColor: "#060713",
+                      borderColor: "rgba(255, 255, 255, 0.12)",
+                      color: "#ffffff",
+                      letterSpacing: "4px",
+                      textAlign: "center",
+                      fontWeight: 700,
+                      fontSize: "18px",
+                    }}
                   />
                 </Form.Item>
 
@@ -295,6 +332,11 @@ const Login = () => {
                     prefix={<LockOutlined style={{ color: "#64748b" }} />}
                     placeholder="Enter new password"
                     size="large"
+                    style={{
+                      backgroundColor: "#060713",
+                      borderColor: "rgba(255, 255, 255, 0.12)",
+                      color: "#ffffff",
+                    }}
                   />
                 </Form.Item>
 

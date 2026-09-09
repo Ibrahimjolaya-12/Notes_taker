@@ -4,7 +4,6 @@ import dns from "node:dns";
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
-import rateLimit from "express-rate-limit"; // 👈 1. Import karein
 
 import userRouter from "./src/Routes/Auth.routes.js";
 import subjectRouter from "./src/Routes/Subject.routes.js";
@@ -12,15 +11,14 @@ import todoRouter from "./src/Routes/Todo.routes.js";
 import avatarRouter from "./src/Routes/Avatar.routes.js";
 import notesRouter from "./src/Routes/Notes.routes.js";
 import aiRouter from "./src/Routes/AI.routes.js";
-import quizRouter from "./src/Routes/Quiz.routes.js"; // Path check kar lena apne folder structure ke mutabiq
+import quizRouter from "./src/Routes/Quiz.routes.js";
 
 import ConnectDB from "./src/Config/db.js";
 
 dotenv.config();
 const app = express();
 
-// Proxy configuration (Production hosting ke liye lazmi hai)
-app.set("trust proxy", 1); // 👈 2. Add karein
+app.set("trust proxy", 1);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -41,18 +39,6 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// 👈 3. Rate Limiter instance banayein
-const aiLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 20, // 15 minute me maximum 20 requests per IP
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: {
-    success: false,
-    message: "Bohat zyada requests bhej di hain, baraye meherbani 15 minute baad koshish karein.",
-  },
-});
-
 app.use(
   "/uploads",
   express.static(path.join(__dirname, "public/temp"), {
@@ -65,15 +51,14 @@ app.use(
   })
 );
 
-// Routes
+// Routes (Each router manages its own specialized rate-limits)
 app.use("/api/auth", userRouter);
 app.use("/api/subjects", subjectRouter);
 app.use("/api/todos", todoRouter);
 app.use("/api/avatar", avatarRouter);
 app.use("/api/notes", notesRouter);
 app.use("/api/quiz", quizRouter);
-// 👈 4. Limiter ko AI router ke sath attach karein
-app.use("/api/ai", aiLimiter, aiRouter);
+app.use("/api/ai", aiRouter);
 
 app.get("/", (req, res) => {
   res.send("Server is running ...");

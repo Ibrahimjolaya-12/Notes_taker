@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { Button, Col, Input, Row, Spin, message, Modal, Space, Popconfirm } from "antd";
+import { Button, Col, Input, Row, Spin, message, Modal, Space, Popconfirm, Grid } from "antd";
 import ReactMarkdown from "react-markdown";
 import { ConfigProvider, theme } from "antd";
 import {
@@ -11,12 +11,15 @@ import {
   ExperimentOutlined,
   CopyOutlined,
   FileTextOutlined,
+  BookOutlined,
 } from "@ant-design/icons";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import AddNoteModal from "./AddNoteModal";
 import PreviewModal from "./PreviewModal";
 import QuizModal from "../../components/QuizModal";
+
+const { useBreakpoint } = Grid;
 
 const IndividualCards = () => {
   const { id } = useParams();
@@ -28,19 +31,21 @@ const IndividualCards = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTag, setSelectedTag] = useState("All");
 
-  // Modals visibility & data state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedNoteForPreview, setSelectedNoteForPreview] = useState(null);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [isQuizOpen, setIsQuizOpen] = useState(false);
 
-  // 👈 Custom Summary Modal State
   const [summaryData, setSummaryData] = useState({
     open: false,
     title: "",
     chapter: "",
+    topic: "",
     content: "",
   });
+
+  const screens = useBreakpoint();
+  const isMobile = !screens.sm;
 
   // 1. Backend Fetch: Subject Details & Notes
   const fetchSubjectAndNotes = useCallback(async () => {
@@ -94,7 +99,8 @@ const IndividualCards = () => {
         setSummaryData({
           open: true,
           title: note.title,
-          chapter: note.chapter || "General Topic",
+          chapter: note.chapter || "General Chapter",
+          topic: note.topic || "Core Concept",
           content: res.data.summary,
         });
       } else {
@@ -125,6 +131,7 @@ const IndividualCards = () => {
     const matchesSearch =
       query === "" ||
       note.title?.toLowerCase().includes(query) ||
+      note.topic?.toLowerCase().includes(query) ||
       note.chapter?.toLowerCase().includes(query) ||
       note.content?.toLowerCase().includes(query);
 
@@ -141,8 +148,6 @@ const IndividualCards = () => {
 
   // 4. Delete Note Handler
   const handleDeleteNote = async (noteId) => {
-    if (!window.confirm("Are you sure you want to delete this note?")) return;
-
     try {
       const token = localStorage.getItem("token");
       const res = await axios.delete(`http://localhost:5000/api/notes/${noteId}`, {
@@ -160,151 +165,365 @@ const IndividualCards = () => {
   };
 
   return (
-    <div className="individual-notes-wrapper">
+    <div
+      className="individual-notes-wrapper"
+      style={{
+        maxWidth: "1280px",
+        margin: "0 auto",
+        padding: isMobile ? "12px" : "20px 24px",
+      }}
+    >
       {/* Top Header */}
-      <Row justify="space-between" align="middle" className="mb-4">
-        <Col>
-          <span className="subject-badge">{subject?.code || "CODE-000"}</span>
-          <h2 className="subject-name">{subject?.name || "Subject Notes"}</h2>
-        </Col>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: isMobile ? "column" : "row",
+          justifyContent: "space-between",
+          alignItems: isMobile ? "stretch" : "center",
+          gap: "14px",
+          marginBottom: "20px",
+        }}
+      >
+        <div>
+          <span
+            style={{
+              color: "#818cf8",
+              fontSize: "12px",
+              fontWeight: 600,
+              textTransform: "uppercase",
+              letterSpacing: "0.5px",
+            }}
+          >
+            {subject?.code || "CODE-000"}
+          </span>
+          <h2
+            style={{
+              color: "#ffffff",
+              fontSize: isMobile ? "20px" : "24px",
+              fontWeight: 700,
+              margin: "2px 0 0",
+            }}
+          >
+            {subject?.name || "Subject Notes"}
+          </h2>
+        </div>
 
-        <Col className="d-flex align-items-center gap-2">
-          <Space size={"middle"}>
-            <button
-              className="btn-quiz d-flex gap-2 align-items-center justify-content-center"
-              onClick={() => setIsQuizOpen(true)}
-            >
-              <ExperimentOutlined />
-              Take Quiz
-            </button>
+        <div style={{ display: "flex", gap: "10px" }}>
+          <Button
+            icon={<ExperimentOutlined />}
+            onClick={() => setIsQuizOpen(true)}
+            style={{
+              background: "rgba(99, 102, 241, 0.12)",
+              borderColor: "rgba(99, 102, 241, 0.3)",
+              color: "#818cf8",
+              fontWeight: 600,
+              flex: isMobile ? 1 : "initial",
+              height: "38px",
+            }}
+          >
+            Take Quiz
+          </Button>
 
-            <Button
-              type="primary"
-              className="btn-add-note"
-              icon={<PlusOutlined />}
-              onClick={() => setIsModalOpen(true)}
-            >
-              Add note
-            </Button>
-          </Space>
-        </Col>
-      </Row>
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={() => setIsModalOpen(true)}
+            style={{
+              backgroundColor: "#6366f1",
+              borderColor: "#6366f1",
+              fontWeight: 600,
+              flex: isMobile ? 1 : "initial",
+              height: "38px",
+            }}
+          >
+            Add note
+          </Button>
+        </div>
+      </div>
 
       {/* Search Bar */}
-      <Row className="mb-3">
-        <Col span={24}>
-          <Input
-            size="large"
-            placeholder="Search notes..."
-            prefix={<SearchOutlined style={{ color: "#7b7a94" }} />}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="dark-search-bar"
-          />
-        </Col>
-      </Row>
+      <div style={{ marginBottom: "14px" }}>
+        <Input
+          size="large"
+          placeholder="Search notes by title, topic, chapter or content..."
+          prefix={<SearchOutlined style={{ color: "#64748b" }} />}
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          style={{
+            background: "#0c0d1e",
+            border: "1px solid rgba(255, 255, 255, 0.1)",
+            borderRadius: "10px",
+            color: "#ffffff",
+          }}
+        />
+      </div>
 
       {/* Tag Filters */}
-      <div className="d-flex align-items-center gap-2 mb-4">
+      <div
+        style={{
+          display: "flex",
+          gap: "8px",
+          overflowX: "auto",
+          paddingBottom: "14px",
+          scrollbarWidth: "none",
+          paddingTop:"10px"
+        }}
+      >
         {availableTags.map((tag) => (
           <button
             key={tag}
             onClick={() => setSelectedTag(tag)}
-            className={`filter-tag-pill ${selectedTag.toLowerCase() === tag.toLowerCase() ? "active" : ""}`}
+            style={{
+              background:
+                selectedTag.toLowerCase() === tag.toLowerCase()
+                  ? "#6366f1"
+                  : "rgba(255, 255, 255, 0.05)",
+              color: selectedTag.toLowerCase() === tag.toLowerCase() ? "#ffffff" : "#94a3b8",
+              border:
+                selectedTag.toLowerCase() === tag.toLowerCase()
+                  ? "1px solid #6366f1"
+                  : "1px solid rgba(255, 255, 255, 0.08)",
+              borderRadius: "20px",
+              padding: "4px 14px",
+              fontSize: "12.5px",
+              cursor: "pointer",
+              whiteSpace: "nowrap",
+              transition: "all 0.2s",
+            }}
           >
             {tag}
           </button>
         ))}
       </div>
 
-      {/* Content Grid */}
+      {/* Content Grid (Desktop: 4 Cards, Tablet: 2 Cards, Mobile: 1 Card) */}
       {loading ? (
-        <div className="text-center py-5">
+        <div style={{ textAlign: "center", padding: "80px 0" }}>
           <Spin size="large" />
         </div>
       ) : filteredNotes.length === 0 ? (
-        <div className="empty-notes-box">
-          <p>No notes found in this folder.</p>
+        <div
+          style={{
+            background: "#0c0d1e",
+            border: "1px solid rgba(255, 255, 255, 0.08)",
+            borderRadius: "14px",
+            padding: "60px 20px",
+            textAlign: "center",
+            color: "#94a3b8",
+          }}
+        >
+          <p style={{ margin: 0, fontSize: "14px" }}>No notes found in this folder.</p>
         </div>
       ) : (
-        <Row gutter={[20, 20]}>
+        <Row gutter={[16, 16]}>
           {filteredNotes.map((note) => (
-            <Col xs={24} sm={12} md={8} key={note._id}>
-              <div className="note-card">
-                <div className="d-flex justify-content-between align-items-start">
-                  <h4 className="note-title">{note.title}</h4>
-                  <Popconfirm
-                    title="Delete Note"
-                    description="Are you sure you want to delete this Notes?"
-                    onConfirm={() => handleDeleteNote(notes._id)}
-                    okText="Yes"
-                    cancelText="No"
-                    okButtonProps={{ danger: true }}
-                    cancelButtonProps={{
-                      style: {
-                        backgroundColor: "#1e1e38",
-                        borderColor: "#35355e",
-                        color: "#ffffff",
-                      },
+            <Col xs={24} sm={12} md={12} lg={6} xl={6} key={note._id}>
+              <div
+                style={{
+                  background: "#0c0d1e",
+                  border: "1px solid rgba(255, 255, 255, 0.08)",
+                  borderRadius: "14px",
+                  padding: "16px",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                  minHeight: "230px",
+                  height: "100%",
+                  boxSizing: "border-box",
+                }}
+              >
+                <div>
+                  {/* Title & Delete Action */}
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "flex-start",
+                      gap: "8px",
+                      marginBottom: "6px",
                     }}
                   >
-                    <button
-                      type="button"
-                      title="Delete Subject"
+                    <h4
                       style={{
-                        background: "rgba(244, 63, 94, 0.12)",
-                        border: "1px solid rgba(244, 63, 94, 0.25)",
-                        color: "#f87171",
-                        width: "30px",
-                        height: "30px",
-                        borderRadius: "6px",
-                        display: "inline-flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        cursor: "pointer",
+                        margin: 0,
+                        color: "#ffffff",
+                        fontSize: "15px",
+                        fontWeight: 600,
+                        lineHeight: 1.35,
+                        wordBreak: "break-word",
                       }}
                     >
-                      <DeleteOutlined style={{ fontSize: "13px" }} />
-                    </button>
-                  </Popconfirm>
-                </div>
+                      {note.title}
+                    </h4>
 
-                <p className="note-chapter">{note.chapter}</p>
-                <p className="note-desc">{note.content}</p>
+                    {/* Fixed Delete with Popconfirm */}
+                    <Popconfirm
+                      title="Delete Note"
+                      description="Delete this note permanently?"
+                      onConfirm={() => handleDeleteNote(note._id)}
+                      okText="Yes"
+                      cancelText="No"
+                      okButtonProps={{ danger: true }}
+                      cancelButtonProps={{
+                        style: {
+                          backgroundColor: "#1e1e38",
+                          borderColor: "#35355e",
+                          color: "#ffffff",
+                        },
+                      }}
+                    >
+                      <button
+                        type="button"
+                        style={{
+                          background: "none",
+                          border: "none",
+                          color: "#64748b",
+                          cursor: "pointer",
+                          padding: 0,
+                        }}
+                        title="Delete Note"
+                      >
+                        <DeleteOutlined style={{ fontSize: "14px" }} />
+                      </button>
+                    </Popconfirm>
+                  </div>
 
-                <div className="d-flex flex-wrap gap-1 mb-2">
-                  {(note.tag || note.tags || "")
-                    .split(",")
-                    .map((t) => t.trim())
-                    .filter(Boolean)
-                    .map((t, idx) => (
-                      <span key={idx} className="note-tag-badge">
-                        {t}
-                      </span>
-                    ))}
-                </div>
-
-                {/* Action Buttons */}
-                <div className="d-flex align-items-center gap-2 mt-3">
-                  <button
-                    className="action-btn"
-                    onClick={() => {
-                      if (!note.fileUrl && !note.driveLink) {
-                        return message.info("No attachment available for this note");
-                      }
-                      setSelectedNoteForPreview(note);
-                      setIsPreviewOpen(true);
+                  {/* 👈 Explicit Topic Display (Fallback if missing) */}
+                  <div
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "5px",
+                      backgroundColor: "rgba(99, 102, 241, 0.12)",
+                      border: "1px solid rgba(99, 102, 241, 0.25)",
+                      borderRadius: "6px",
+                      padding: "2px 8px",
+                      marginBottom: "6px",
                     }}
                   >
-                    <EyeOutlined /> Preview
-                  </button>
+                    <BookOutlined style={{ fontSize: "11px", color: "#818cf8" }} />
+                    <span
+                      style={{
+                        color: "#a5b4fc",
+                        fontSize: "11.5px",
+                        fontWeight: 600,
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        maxWidth: "180px",
+                      }}
+                    >
+                      {note.topic || note.chapter || "General Topic"}
+                    </span>
+                  </div>
 
-                  <button
-                    className="action-btn"
-                    onClick={() => handleSummarize(note)}
+                  {/* Chapter */}
+                  {note.chapter && (
+                    <p
+                      style={{
+                        color: "#94a3b8",
+                        fontSize: "12px",
+                        fontWeight: 500,
+                        margin: "0 0 6px 0",
+                      }}
+                    >
+                      Chapter: {note.chapter}
+                    </p>
+                  )}
+
+                  {/* Content / Description */}
+                  <p
+                    style={{
+                      color: "#cbd5e1",
+                      fontSize: "13px",
+                      lineHeight: 1.5,
+                      margin: "0 0 12px 0",
+                      display: "-webkit-box",
+                      WebkitLineClamp: 3,
+                      WebkitBoxOrient: "vertical",
+                      overflow: "hidden",
+                    }}
                   >
-                    <ThunderboltOutlined /> Summarize
-                  </button>
+                    {note.content || "No textual description available."}
+                  </p>
+                </div>
+
+                <div>
+                  {/* Tags Badges */}
+                  <div
+                    style={{
+                      display: "flex",
+                      flexWrap: "wrap",
+                      gap: "4px",
+                      marginBottom: "12px",
+                    }}
+                  >
+                    {(note.tag || note.tags || "")
+                      .split(",")
+                      .map((t) => t.trim())
+                      .filter(Boolean)
+                      .map((t, idx) => (
+                        <span
+                          key={idx}
+                          style={{
+                            background: "rgba(255, 255, 255, 0.05)",
+                            color: "#cbd5e1",
+                            border: "1px solid rgba(255, 255, 255, 0.1)",
+                            borderRadius: "4px",
+                            padding: "2px 6px",
+                            fontSize: "11px",
+                          }}
+                        >
+                          {t}
+                        </span>
+                      ))}
+                  </div>
+
+                  {/* Actions (Preview & AI Summarize) */}
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "8px",
+                      borderTop: "1px solid rgba(255, 255, 255, 0.06)",
+                      paddingTop: "10px",
+                    }}
+                  >
+                    <Button
+                      size="small"
+                      icon={<EyeOutlined />}
+                      onClick={() => {
+                        if (!note.fileUrl && !note.driveLink) {
+                          return message.info("No attachment available for this note");
+                        }
+                        setSelectedNoteForPreview(note);
+                        setIsPreviewOpen(true);
+                      }}
+                      style={{
+                        background: "rgba(255, 255, 255, 0.05)",
+                        borderColor: "rgba(255, 255, 255, 0.1)",
+                        color: "#cbd5e1",
+                        fontSize: "12px",
+                        flex: 1,
+                      }}
+                    >
+                      Preview
+                    </Button>
+
+                    <Button
+                      size="small"
+                      icon={<ThunderboltOutlined />}
+                      onClick={() => handleSummarize(note)}
+                      style={{
+                        background: "rgba(99, 102, 241, 0.15)",
+                        borderColor: "rgba(99, 102, 241, 0.3)",
+                        color: "#818cf8",
+                        fontSize: "12px",
+                        flex: 1,
+                      }}
+                    >
+                      Summary
+                    </Button>
+                  </div>
                 </div>
               </div>
             </Col>
@@ -338,8 +557,7 @@ const IndividualCards = () => {
         subjectName={subject?.name}
       />
 
-      {/* 👈 Clean Custom AI Summary Modal */}
-      {/* 👈 Clean Dark-Themed AI Summary Modal with Markdown */}
+      {/* AI Summary Modal */}
       <ConfigProvider
         theme={{
           algorithm: theme.darkAlgorithm,
@@ -356,16 +574,15 @@ const IndividualCards = () => {
           onCancel={() => setSummaryData((prev) => ({ ...prev, open: false }))}
           footer={null}
           centered
-          width={700}
+          width={isMobile ? "94%" : 700}
           destroyOnClose
-          className="quiz-dark-modal"
           styles={{
             mask: { backdropFilter: "blur(8px)", backgroundColor: "rgba(3, 7, 18, 0.82)" },
             content: {
               backgroundColor: "#0d0f1a",
               border: "1px solid rgba(255, 255, 255, 0.1)",
               borderRadius: "16px",
-              padding: "24px",
+              padding: isMobile ? "16px" : "24px",
               boxShadow: "0 25px 60px rgba(0, 0, 0, 0.85)",
             },
             header: {
@@ -374,30 +591,39 @@ const IndividualCards = () => {
             },
           }}
           title={
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingRight: "28px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingRight: "10px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0 }}>
                 <div
                   style={{
-                    width: "40px",
-                    height: "40px",
+                    width: "36px",
+                    height: "36px",
                     borderRadius: "10px",
                     background: "linear-gradient(135deg, #6366f1, #4338ca)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     color: "#fff",
-                    fontSize: "18px",
-                    boxShadow: "0 4px 12px rgba(99, 102, 241, 0.35)",
+                    fontSize: "16px",
+                    flexShrink: 0,
                   }}
                 >
                   <ThunderboltOutlined />
                 </div>
-                <div>
-                  <h4 style={{ margin: 0, fontSize: "16px", color: "#f8fafc", fontWeight: 700 }}>
+                <div style={{ minWidth: 0 }}>
+                  <h4 style={{ margin: 0, fontSize: "15px", color: "#f8fafc", fontWeight: 700 }}>
                     Exam Review & Summary
                   </h4>
-                  <span style={{ fontSize: "12px", color: "#94a3b8" }}>
-                    {summaryData.chapter} • {summaryData.title}
+                  <span
+                    style={{
+                      fontSize: "11.5px",
+                      color: "#94a3b8",
+                      display: "block",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    {summaryData.topic} • {summaryData.title}
                   </span>
                 </div>
               </div>
@@ -407,7 +633,7 @@ const IndividualCards = () => {
                 icon={<CopyOutlined />}
                 onClick={() => {
                   navigator.clipboard.writeText(summaryData.content);
-                  message.success("Summary copied to clipboard!");
+                  message.success("Summary copied!");
                 }}
                 style={{
                   background: "rgba(255, 255, 255, 0.05)",
@@ -416,13 +642,12 @@ const IndividualCards = () => {
                   borderRadius: "6px",
                 }}
               >
-                Copy
+                {!isMobile && "Copy"}
               </Button>
             </div>
           }
         >
-          <div style={{ marginTop: "16px" }}>
-            {/* Context Info Banner */}
+          <div style={{ marginTop: "14px" }}>
             <div
               style={{
                 background: "rgba(99, 102, 241, 0.1)",
@@ -432,45 +657,41 @@ const IndividualCards = () => {
                 display: "flex",
                 alignItems: "center",
                 gap: "10px",
-                marginBottom: "16px",
+                marginBottom: "14px",
               }}
             >
               <FileTextOutlined style={{ color: "#818cf8", fontSize: "16px" }} />
-              <span style={{ fontSize: "12.5px", color: "#cbd5e1" }}>
+              <span style={{ fontSize: "12px", color: "#cbd5e1" }}>
                 Extracted directly from notes and study material using AI summarization.
               </span>
             </div>
 
-            {/* Markdown Rendered Content Body */}
             <div
-              className="summary-markdown-body"
               style={{
                 background: "#141824",
                 border: "1px solid rgba(255, 255, 255, 0.08)",
                 borderRadius: "12px",
-                padding: "18px 22px",
+                padding: isMobile ? "14px 16px" : "18px 22px",
                 color: "#cbd5e1",
-                fontSize: "14px",
-                lineHeight: 1.7,
-                maxHeight: "420px",
+                fontSize: "13.5px",
+                lineHeight: 1.65,
+                maxHeight: "380px",
                 overflowY: "auto",
               }}
             >
               <ReactMarkdown>{summaryData.content}</ReactMarkdown>
             </div>
 
-            {/* Modal Footer */}
-            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "20px" }}>
+            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "16px" }}>
               <Button
                 type="primary"
-                size="middle"
                 onClick={() => setSummaryData((prev) => ({ ...prev, open: false }))}
                 style={{
                   background: "#6366f1",
                   borderColor: "#6366f1",
                   fontWeight: 600,
                   borderRadius: "8px",
-                  padding: "0 24px",
+                  padding: "0 22px",
                 }}
               >
                 Done

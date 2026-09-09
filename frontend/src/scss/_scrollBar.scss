@@ -1,0 +1,57 @@
+/* ===================================================
+   🎨 Global & Chat Theme Custom Scrollbar
+   =================================================== */
+
+// 1. Global Browser Scrollbar (Webkit: Chrome, Edge, Safari, Brave)
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #080816; // App ka deep dark background
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #252a4a; // Subtle dark indigo idle state
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.2s ease-in-out;
+
+  &:hover {
+    background: #6366f1; // Primary indigo accent on hover
+    box-shadow: 0 0 10px rgba(99, 102, 241, 0.5); // Neon glow
+  }
+
+  &:active {
+    background: #4f46e5;
+  }
+}
+
+// 2. Firefox Support
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #252a4a #080816;
+}
+
+// 3. Specifically for AI Chat Messages Box
+.chat-messages-area,
+.ai-chat-wrapper {
+  &::-webkit-scrollbar {
+    width: 5px; // Slightly sleeker inside chat area
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent; // Clean borderless look
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(99, 102, 241, 0.25);
+    border-radius: 10px;
+
+    &:hover {
+      background: #6366f1;
+    }
+  }
+}

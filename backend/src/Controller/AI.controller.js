@@ -21,16 +21,14 @@ export const askStudyAI = async (req, res) => {
     let mediaUrl = "";
     let mediaType = "text";
 
-    // Agar user ne koi file upload ki hai
     if (req.file) {
       const filePath = req.file.path;
       const isPdf = req.file.mimetype === "application/pdf" || req.file.originalname.endsWith(".pdf");
 
       if (isPdf) {
-        // PDF se text extract karo
         const pdfText = await extractTextFromPDF(filePath);
         if (pdfText && pdfText.trim().length > 0) {
-          fileContext = `\n\n--- ATTACHED PDF DOCUMENT CONTENT ---\n${pdfText.slice(0, 8000)}\n--- END DOCUMENT ---\n`;
+          fileContext = `\n\n--- ATTACHED PDF DOCUMENT CONTENT ---\n${pdfText.slice(0, 5000)}\n--- END DOCUMENT ---\n`;
         }
         mediaType = "pdf";
       } else {
@@ -53,20 +51,14 @@ ${subject ? `The user is currently studying the subject: ${subject}.` : ""}
 
     const userFinalPrompt = `${fileContext}${prompt?.trim() || "Please analyze this attached document and provide key takeaways."}`;
 
-    // Groq API Call
     const chatCompletion = await groq.chat.completions.create({
       messages: [
-        {
-          role: "system",
-          content: systemInstruction,
-        },
-        {
-          role: "user",
-          content: userFinalPrompt,
-        },
+        { role: "system", content: systemInstruction },
+        { role: "user", content: userFinalPrompt },
       ],
-      model: "qwen/qwen3.8-27b",
-      temperature: 0.2,
+      model: "openai/gpt-oss-20b",
+      temperature: 0.3,
+      max_completion_tokens: 1024,
     });
 
     const replyText = chatCompletion.choices[0]?.message?.content || "No response generated.";
@@ -111,7 +103,7 @@ ${subject ? `The user is currently studying the subject: ${subject}.` : ""}
   }
 };
 
-// 2. Particular Card / Topic PDF Document Summarizer
+// 2. Particular Card / Topic PDF Document Summarizer (REAL PDF EXTRACTION)
 export const summarizeNotePDF = async (req, res) => {
   try {
     const { noteId } = req.params;
@@ -123,9 +115,12 @@ export const summarizeNotePDF = async (req, res) => {
 
     let extractedText = "";
 
+    // Step A: Agar PDF URL available hai
     if (note.fileUrl) {
       const cleanUrl = note.fileUrl.split("?")[0];
       const fileName = path.basename(cleanUrl);
+
+      // 1. Local disk search
       const possiblePaths = [
         path.join(process.cwd(), "public/temp", fileName),
         path.join(process.cwd(), "public/uploads", fileName),
@@ -138,35 +133,76 @@ export const summarizeNotePDF = async (req, res) => {
           if (extractedText && extractedText.trim().length > 0) break;
         }
       }
+
+      // 2. Remote / Full URL fallback (built-in fetch se buffer fetch karo)
+      if (!extractedText && (note.fileUrl.startsWith("http://") || note.fileUrl.startsWith("https://"))) {
+        try {
+          const response = await fetch(note.fileUrl);
+          if (response.ok) {
+            const arrayBuffer = await response.arrayBuffer();
+            const tempFolder = path.join(process.cwd(), "public/temp");
+            if (!fs.existsSync(tempFolder)) {
+              fs.mkdirSync(tempFolder, { recursive: true });
+            }
+
+            const tempFilePath = path.join(tempFolder, `sum_${Date.now()}_${fileName}`);
+            fs.writeFileSync(tempFilePath, Buffer.from(arrayBuffer));
+
+            extractedText = await extractTextFromPDF(tempFilePath);
+
+            // Cleanup temp file
+            if (fs.existsSync(tempFilePath)) {
+              fs.unlinkSync(tempFilePath);
+            }
+          }
+        } catch (dlErr) {
+          console.error("Remote PDF Download & Parse Failed:", dlErr.message);
+        }
+      }
     }
 
-    const rawContent = (
-      extractedText ||
-      note.content ||
-      note.description ||
-      `Study topic: ${note.title}. Chapter: ${note.chapter || "General"}`
-    ).trim();
+    // Step B: Strict validation - Agar PDF se text na nikle
+    if (!extractedText || extractedText.trim().length < 30) {
+      if (note.content && note.content.trim().length > 60) {
+        extractedText = note.content;
+      } else {
+        return res.status(400).json({
+          success: false,
+          message: "Uploaded PDF se text read nahi ho saka (scanned image ho sakti hai ya file path invalid hai).",
+        });
+      }
+    }
 
-    const safeContext = rawContent.slice(0, 7000);
+    const safeContext = extractedText.slice(0, 6000);
 
-    const promptText = `Provide an exam-oriented study summary for: "${note.title}".
-Context details:
+    const promptText = `You are an academic exam assistant. Read the provided study document content carefully and summarize it.
+
+--- ATTACHED PDF DOCUMENT CONTENT ---
 ${safeContext}
+--- END DOCUMENT CONTENT ---
 
-Output format:
-- **Overview**: 2 concise lines explaining the core concept.
-- **Key Exam Takeaways**: 3-5 high-yield bullet points.
-- **Important Definitions / Formulas**: Essential terms or formulas to remember.`;
+Subject Topic: "${note.title}"
+Chapter: "${note.chapter || "General"}"
+
+Output Format (strict Markdown):
+- **Document Overview**: 2 lines summarizing what this attached document specifically covers.
+- **Core Topics & Key Points**: 3 to 5 high-yield concepts extracted directly from the text above.
+- **Important Definitions / Takeaways**: Essential formulas, rules, or exam questions.`;
 
     const chatCompletion = await groq.chat.completions.create({
       messages: [
+        {
+          role: "system",
+          content: "You are a professional academic summarizer. Always ground your summary directly in the provided document text.",
+        },
         {
           role: "user",
           content: promptText,
         },
       ],
-      model: "qwen/qwen3.8-27b",
+      model: "openai/gpt-oss-20b",
       temperature: 0.2,
+      max_completion_tokens: 800,
     });
 
     const summary = chatCompletion.choices[0]?.message?.content || "No summary generated.";
