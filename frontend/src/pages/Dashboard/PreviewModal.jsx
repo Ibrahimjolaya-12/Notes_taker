@@ -46,14 +46,14 @@ const PreviewModal = ({ visible, onClose, note }) => {
     return `${note.title || "document"}.pdf`;
   };
 
-  // Mozilla PDF.js viewer URL to cleanly embed and render PDFs inside modal iframe
   const getEmbedUrl = (url) => {
     if (!url) return "";
     if (url.includes("drive.google.com/file/d/")) {
       return url.replace(/\/view.*$/, "/preview");
     }
+    // Safe PDF embed viewer using browser native PDF support
     if (isPdf && !isImage) {
-      return `https://mozilla.github.io/pdf.js/web/viewer.html?file=${encodeURIComponent(url)}`;
+      return `${url}#toolbar=1&view=FitH`;
     }
     return url;
   };
@@ -300,6 +300,22 @@ const PreviewModal = ({ visible, onClose, note }) => {
                     }}
                   />
                 </div>
+              ) : isPdf ? (
+                <object
+                  data={rawUrl}
+                  type="application/pdf"
+                  style={{ width: "100%", height: "100%" }}
+                >
+                  <iframe
+                    src={getEmbedUrl(rawUrl)}
+                    title="Document Preview"
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      border: "none",
+                    }}
+                  />
+                </object>
               ) : (
                 <iframe
                   src={getEmbedUrl(rawUrl)}
