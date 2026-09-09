@@ -11,6 +11,7 @@ import {
   ConfigProvider,
   Grid,
   Modal,
+  Pagination,
   theme,
 } from "antd";
 import {
@@ -38,6 +39,10 @@ const ShowTodos = () => {
   const [loading, setLoading] = useState(false);
   const [todos, setTodos] = useState([]);
 
+  // Pagination States
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
+
   // Modal States
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [selectedTodo, setSelectedTodo] = useState(null);
@@ -45,7 +50,6 @@ const ShowTodos = () => {
   const screens = useBreakpoint();
   const isMobile = !screens.sm;
 
-  // Single dynamic fetch function supporting status filter
   const fetchTodos = async (status = "all") => {
     try {
       setLoading(true);
@@ -67,7 +71,9 @@ const ShowTodos = () => {
       );
 
       if (res.data?.success) {
-        setTodos(res.data.todos || res.data.data || []);
+        const dataList = res.data.todos || res.data.data || [];
+        setTodos(Array.isArray(dataList) ? dataList : []);
+        setCurrentPage(1);
       }
     } catch (error) {
       console.error("FETCH TODOS ERROR:", error);
@@ -110,6 +116,12 @@ const ShowTodos = () => {
   useEffect(() => {
     fetchTodos();
   }, []);
+
+  // Safe Pagination Slice Logic
+  const safeTodos = Array.isArray(todos) ? todos : [];
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const paginatedTodos = safeTodos.slice(startIndex, endIndex);
 
   const renderStatusTag = (status) => {
     const isCompleted = status === "completed" || status === "complete";
@@ -161,6 +173,12 @@ const ShowTodos = () => {
           Popconfirm: {
             colorBgElevated: "#0d1026",
           },
+          Pagination: {
+            colorBgContainer: "#0d1026",
+            colorBorder: "#1e2652",
+            colorPrimary: "#6366f1",
+            itemActiveBg: "#6366f1",
+          },
         },
       }}
     >
@@ -183,7 +201,6 @@ const ShowTodos = () => {
             marginBottom: "20px",
           }}
         >
-          {/* Title + Filter */}
           <div
             style={{
               display: "flex",
@@ -215,7 +232,6 @@ const ShowTodos = () => {
             </Select>
           </div>
 
-          {/* Search + Add Button */}
           <div
             style={{
               display: "flex",
@@ -224,7 +240,12 @@ const ShowTodos = () => {
               justifyContent: isMobile ? "space-between" : "flex-end",
             }}
           >
-            <SearchBtn setTodos={setTodos} />
+            <SearchBtn
+              setTodos={(newTodos) => {
+                setTodos(Array.isArray(newTodos) ? newTodos : []);
+                setCurrentPage(1);
+              }}
+            />
 
             <Button
               type="primary"
@@ -252,7 +273,7 @@ const ShowTodos = () => {
               <div style={{ textAlign: "center", padding: "80px 0" }}>
                 <Spin size="large" />
               </div>
-            ) : todos.length === 0 ? (
+            ) : safeTodos.length === 0 ? (
               <div
                 style={{
                   backgroundColor: "#0d1026",
@@ -277,7 +298,7 @@ const ShowTodos = () => {
                 </p>
               </div>
             ) : isMobile ? (
-              /* 📱 Mobile Responsive Cards Grid */
+              /* Mobile Cards View */
               <div
                 style={{
                   display: "flex",
@@ -285,7 +306,7 @@ const ShowTodos = () => {
                   gap: "12px",
                 }}
               >
-                {todos.map((todo, index) => (
+                {paginatedTodos.map((todo, index) => (
                   <div
                     key={todo._id || index}
                     style={{
@@ -318,7 +339,6 @@ const ShowTodos = () => {
                       {renderStatusTag(todo.status)}
                     </div>
 
-                    {/* Metadata */}
                     <div
                       style={{
                         display: "flex",
@@ -364,7 +384,6 @@ const ShowTodos = () => {
                       </div>
                     </div>
 
-                    {/* Action Buttons */}
                     <div
                       style={{
                         display: "flex",
@@ -445,7 +464,7 @@ const ShowTodos = () => {
                 ))}
               </div>
             ) : (
-              /* 💻 Desktop Table View */
+              /* Desktop Table View */
               <div
                 style={{
                   backgroundColor: "#0d1026",
@@ -491,7 +510,7 @@ const ShowTodos = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {todos.map((todo, index) => (
+                      {paginatedTodos.map((todo, index) => (
                         <tr
                           key={todo._id || index}
                           style={{
@@ -513,7 +532,7 @@ const ShowTodos = () => {
                               fontSize: "13px",
                             }}
                           >
-                            {index + 1}
+                            {startIndex + index + 1}
                           </td>
                           <td
                             style={{
@@ -645,6 +664,33 @@ const ShowTodos = () => {
                 </div>
               </div>
             )}
+
+            {/* Pagination Controls */}
+            {!loading && safeTodos.length > pageSize && (
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: isMobile ? "center" : "flex-end",
+                  marginTop: "20px",
+                  padding: "10px 0",
+                }}
+              >
+                <Pagination
+                  current={currentPage}
+                  pageSize={pageSize}
+                  total={safeTodos.length}
+                  onChange={(page, size) => {
+                    setCurrentPage(page);
+                    setPageSize(size);
+                  }}
+                  showSizeChanger={!isMobile}
+                  pageSizeOptions={["5", "10", "20"]}
+                  showTotal={(total, range) =>
+                    !isMobile ? `${range[0]}-${range[1]} of ${total} tasks` : ""
+                  }
+                />
+              </div>
+            )}
           </Col>
         </Row>
 
@@ -671,7 +717,6 @@ const ShowTodos = () => {
         >
           {selectedTodo && (
             <div>
-              {/* Header */}
               <div
                 style={{
                   display: "flex",
@@ -729,7 +774,6 @@ const ShowTodos = () => {
                 />
               </div>
 
-              {/* Title & Status */}
               <div
                 style={{
                   background: "#0d1026",
@@ -762,7 +806,6 @@ const ShowTodos = () => {
                 </div>
               </div>
 
-              {/* Info Grid (Location & Date) */}
               <Row gutter={[12, 12]} style={{ marginBottom: "14px" }}>
                 <Col span={isMobile ? 24 : 12}>
                   <div
@@ -840,7 +883,6 @@ const ShowTodos = () => {
                 </Col>
               </Row>
 
-              {/* Description */}
               <div
                 style={{
                   background: "#0d1026",
@@ -874,7 +916,6 @@ const ShowTodos = () => {
                 </p>
               </div>
 
-              {/* Footer Actions */}
               <div
                 style={{
                   display: "flex",
