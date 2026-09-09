@@ -1,25 +1,39 @@
 import Note from "../Models/Notes.Model.js";
 import fs from "fs";
 import path from "path";
-import { fileURLToPath } from "url";
+import os from "os";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// Helper function: Local disk se purani file delete karne ke liye
-// Notes.controller.js ke top par helper:
+// Safe helper: Serverless / local file cleanup
 const deleteLocalFile = (fileUrl) => {
   if (!fileUrl) return;
   try {
     const filename = path.basename(fileUrl);
-    // 👈 public/temp se delete karega
-    const filePath = path.join(__dirname, "../../public/temp", filename);
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
+    const possiblePaths = [
+      path.join(process.cwd(), "public/temp", filename),
+      path.join(os.tmpdir(), "temp", filename),
+      path.join(process.cwd(), filename),
+    ];
+
+    for (const filePath of possiblePaths) {
+      if (fs.existsSync(filePath)) {
+        fs.unlinkSync(filePath);
+        break;
+      }
     }
   } catch (err) {
     console.error("Local file cleanup error:", err.message);
   }
+};
+
+// Safe User ID Extractor
+const extractUserId = (req) => {
+  return (
+    req.user?._id ||
+    req.user?.id ||
+    req.user?.userId ||
+    req.user?.uid ||
+    (typeof req.user === "string" ? req.user : null)
+  );
 };
 
 // 1. CREATE NOTE
@@ -34,7 +48,7 @@ export const createNotes = async (req, res) => {
       });
     }
 
-    const userId = req.user?._id || req.user?.id || req.user?.userId || req.user?.uid;
+    const userId = extractUserId(req);
     if (!userId) {
       return res.status(401).json({
         success: false,
@@ -50,10 +64,9 @@ export const createNotes = async (req, res) => {
       });
     }
 
-    // Dynamic base URL (Hardcoding avoid karne ke liye)
     let fileUrl = "";
     if (req.file) {
-      fileUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+      fileUrl = `https://class-notes-backend.vercel.app/uploads/${req.file.filename}`;
     }
 
     const newNote = await Note.create({
@@ -86,7 +99,14 @@ export const createNotes = async (req, res) => {
 export const getNotesBySubject = async (req, res) => {
   try {
     const { subjectId } = req.params;
-    const userId = req.user?._id || req.user?.id || req.user?.userId || req.user?.uid;
+    const userId = extractUserId(req);
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized access! User identification failed.",
+      });
+    }
 
     const notes = await Note.find({ subject: subjectId, user: userId }).sort({
       createdAt: -1,
@@ -109,7 +129,14 @@ export const getNotesBySubject = async (req, res) => {
 export const getSingleNote = async (req, res) => {
   try {
     const { id } = req.params;
-    const userId = req.user?._id || req.user?.id || req.user?.userId || req.user?.uid;
+    const userId = extractUserId(req);
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized! User ID missing in token.",
+      });
+    }
 
     const note = await Note.findOne({ _id: id, user: userId });
     if (!note) {
@@ -135,7 +162,15 @@ export const getSingleNote = async (req, res) => {
 export const updateNote = async (req, res) => {
   try {
     const { id } = req.params;
-    const userId = req.user?._id || req.user?.id || req.user?.userId || req.user?.uid;
+    const userId = extractUserId(req);
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized! User ID missing in token.",
+      });
+    }
+
     const { title, topic, chapter, tags, content, driveLink } = req.body;
 
     const existingNote = await Note.findOne({ _id: id, user: userId });
@@ -155,10 +190,9 @@ export const updateNote = async (req, res) => {
       ...(driveLink !== undefined && { driveLink: driveLink.trim() }),
     };
 
-    // Agar user nayi file bhej raha hai to purani file disk se remove karo
     if (req.file) {
       deleteLocalFile(existingNote.fileUrl);
-      updateFields.fileUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+      updateFields.fileUrl = `https://class-notes-backend.vercel.app/uploads/${req.file.filename}`;
     }
 
     const updatedNote = await Note.findByIdAndUpdate(
@@ -184,7 +218,14 @@ export const updateNote = async (req, res) => {
 export const deleteNote = async (req, res) => {
   try {
     const { id } = req.params;
-    const userId = req.user?._id || req.user?.id || req.user?.userId || req.user?.uid;
+    const userId = extractUserId(req);
+
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized! User ID missing in token.",
+      });
+    }
 
     const note = await Note.findOneAndDelete({ _id: id, user: userId });
 
@@ -195,7 +236,6 @@ export const deleteNote = async (req, res) => {
       });
     }
 
-    // Disk se physical file remove karo taake storage free rahe
     if (note.fileUrl) {
       deleteLocalFile(note.fileUrl);
     }
