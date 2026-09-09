@@ -1,29 +1,6 @@
 import Note from "../Models/Notes.Model.js";
-import fs from "fs";
-import path from "path";
-import os from "os";
-
-// Safe helper: Serverless / local file cleanup
-const deleteLocalFile = (fileUrl) => {
-  if (!fileUrl) return;
-  try {
-    const filename = path.basename(fileUrl);
-    const possiblePaths = [
-      path.join(process.cwd(), "public/temp", filename),
-      path.join(os.tmpdir(), "temp", filename),
-      path.join(process.cwd(), filename),
-    ];
-
-    for (const filePath of possiblePaths) {
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-        break;
-      }
-    }
-  } catch (err) {
-    console.error("Local file cleanup error:", err.message);
-  }
-};
+import { uploadOnCloudinary } from "../Utils/Cloudinary.js";
+import { v2 as cloudinary } from "cloudinary";
 
 // Safe User ID Extractor
 const extractUserId = (req) => {
@@ -65,8 +42,14 @@ export const createNotes = async (req, res) => {
     }
 
     let fileUrl = "";
-    if (req.file) {
-      fileUrl = `https://class-notes-backend.vercel.app/uploads/${req.file.filename}`;
+    let filePublicId = "";
+
+    if (req.file && req.file.path) {
+      const uploadResponse = await uploadOnCloudinary(req.file.path);
+      if (uploadResponse) {
+        fileUrl = uploadResponse.secure_url;
+        filePublicId = uploadResponse.public_id;
+      }
     }
 
     const newNote = await Note.create({
@@ -77,6 +60,7 @@ export const createNotes = async (req, res) => {
       content: content ? content.trim() : "",
       driveLink: driveLink ? driveLink.trim() : "",
       fileUrl: fileUrl,
+      filePublicId: filePublicId,
       subject: subjectId,
       user: userId,
     });
@@ -190,9 +174,20 @@ export const updateNote = async (req, res) => {
       ...(driveLink !== undefined && { driveLink: driveLink.trim() }),
     };
 
-    if (req.file) {
-      deleteLocalFile(existingNote.fileUrl);
-      updateFields.fileUrl = `https://class-notes-backend.vercel.app/uploads/${req.file.filename}`;
+    if (req.file && req.file.path) {
+      if (existingNote.filePublicId) {
+        try {
+          await cloudinary.uploader.destroy(existingNote.filePublicId);
+        } catch (delErr) {
+          console.error("Cloudinary old file delete error:", delErr.message);
+        }
+      }
+
+      const uploadResponse = await uploadOnCloudinary(req.file.path);
+      if (uploadResponse) {
+        updateFields.fileUrl = uploadResponse.secure_url;
+        updateFields.filePublicId = uploadResponse.public_id;
+      }
     }
 
     const updatedNote = await Note.findByIdAndUpdate(
@@ -236,8 +231,12 @@ export const deleteNote = async (req, res) => {
       });
     }
 
-    if (note.fileUrl) {
-      deleteLocalFile(note.fileUrl);
+    if (note.filePublicId) {
+      try {
+        await cloudinary.uploader.destroy(note.filePublicId);
+      } catch (delErr) {
+        console.error("Cloudinary file delete error:", delErr.message);
+      }
     }
 
     return res.status(200).json({
