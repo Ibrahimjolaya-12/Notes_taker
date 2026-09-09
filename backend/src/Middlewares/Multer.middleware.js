@@ -3,10 +3,8 @@ import path from "path";
 import fs from "fs";
 import os from "os";
 
-// Vercel serverless environment check
 const isServerless = process.env.VERCEL || process.env.NODE_ENV === "production";
 
-// Vercel par os.tmpdir() (/tmp) writable hota hai, local par public/temp
 const uploadDir = isServerless
   ? path.join(os.tmpdir(), "temp")
   : path.join(process.cwd(), "public/temp");
