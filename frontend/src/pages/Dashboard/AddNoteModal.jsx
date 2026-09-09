@@ -32,7 +32,7 @@ const AddNoteModal = ({ visible, onClose, subjectId, onNoteCreated }) => {
       }
 
       const res = await axios.post(
-        `http://localhost:5000/api/notes/create/${subjectId}`,
+        `https://class-notes-backend.vercel.app/api/notes/create/${subjectId}`,
         formData,
         {
           headers: {

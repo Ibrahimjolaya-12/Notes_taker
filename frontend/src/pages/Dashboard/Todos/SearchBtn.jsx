@@ -43,7 +43,7 @@ const SearchBtn = ({ setTodos }) => {
       }
 
       const res = await axios.get(
-        `http://localhost:5000/api/todos/getAllTodos?search=${encodeURIComponent(text)}`,
+        `https://class-notes-backend.vercel.app/api/todos/getAllTodos?search=${encodeURIComponent(text)}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }

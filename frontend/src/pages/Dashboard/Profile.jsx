@@ -55,7 +55,7 @@ const Profile = () => {
         setEmail(storedUser.email || "");
         setSemester(storedUser.semester || "Semester 1");
 
-        const res = await axios.get("http://localhost:5000/api/avatar/me", {
+        const res = await axios.get("https://class-notes-backend.vercel.app/api/avatar/me", {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (res.data?.success && res.data?.avatar) {
@@ -95,7 +95,7 @@ const Profile = () => {
       if (selectedFile) {
         const data = new FormData();
         data.append("avatar", selectedFile);
-        await axios.post("http://localhost:5000/api/avatar/upload", data, {
+        await axios.post("https://class-notes-backend.vercel.app/api/avatar/upload", data, {
           headers: {
             ...headers,
             "Content-Type": "multipart/form-data",
@@ -105,7 +105,7 @@ const Profile = () => {
 
       // Step B: Update Semester
       const semRes = await axios.put(
-        "http://localhost:5000/api/avatar/sem",
+        "https://class-notes-backend.vercel.app/api/avatar/sem",
         { semester },
         { headers }
       );

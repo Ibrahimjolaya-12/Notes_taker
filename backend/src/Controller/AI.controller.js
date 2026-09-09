@@ -35,7 +35,7 @@ export const askStudyAI = async (req, res) => {
         mediaType = "image";
       }
 
-      mediaUrl = `http://localhost:5000/uploads/${req.file.filename}`;
+      mediaUrl = `https://class-notes-backend.vercel.app/uploads/${req.file.filename}`;
     }
 
     const systemInstruction = `

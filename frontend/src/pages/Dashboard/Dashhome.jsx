@@ -20,7 +20,7 @@ const Dashhome = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem("token");
-      const res = await axios.get("http://localhost:5000/api/subjects/my-subjects", {
+      const res = await axios.get("https://class-notes-backend.vercel.app/api/subjects/my-subjects", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -69,7 +69,7 @@ const Dashhome = () => {
   const handleDelete = async (subjectId) => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.delete(`http://localhost:5000/api/subjects/${subjectId}`, {
+      const res = await axios.delete(`https://class-notes-backend.vercel.app/api/subjects/${subjectId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 

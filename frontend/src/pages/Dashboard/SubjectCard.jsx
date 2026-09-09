@@ -18,7 +18,7 @@ const SubjectCard = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.post("http://localhost:5000/api/subjects/create", values, {
+      const res = await axios.post("https://class-notes-backend.vercel.app/api/subjects/create", values, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

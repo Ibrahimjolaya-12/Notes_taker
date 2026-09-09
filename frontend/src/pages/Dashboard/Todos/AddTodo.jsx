@@ -34,7 +34,7 @@ const AddTodo = () => {
       };
 
       const res = await axios.post(
-        "http://localhost:5000/api/todos/addTodos",
+        "https://class-notes-backend.vercel.app/api/todos/addTodos",
         payload,
         {
           headers: {

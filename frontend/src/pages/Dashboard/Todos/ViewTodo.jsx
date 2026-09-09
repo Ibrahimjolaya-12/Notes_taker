@@ -34,7 +34,7 @@ const ViewTodo = () => {
           return;
         }
 
-        const res = await axios.get(`http://localhost:5000/api/todos/${id}`, {
+        const res = await axios.get(`https://class-notes-backend.vercel.app/api/todos/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

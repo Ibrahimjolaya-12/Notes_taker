@@ -19,9 +19,9 @@ const PreviewModal = ({ visible, onClose, note }) => {
   // 1. URL Resolution logic
   let rawUrl = note.fileUrl || note.driveLink || "";
   if (rawUrl.startsWith("/uploads")) {
-    rawUrl = `http://localhost:5000${rawUrl}`;
+    rawUrl = `https://class-notes-backend.vercel.app${rawUrl}`;
   } else if (rawUrl && !rawUrl.startsWith("http") && !rawUrl.includes("drive.google.com")) {
-    rawUrl = `http://localhost:5000/uploads/${rawUrl}`;
+    rawUrl = `https://class-notes-backend.vercel.app/uploads/${rawUrl}`;
   }
 
   const isPdf = rawUrl.toLowerCase().endsWith(".pdf") || rawUrl.includes("drive.google.com");
