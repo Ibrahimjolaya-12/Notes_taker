@@ -46,6 +46,18 @@ const PreviewModal = ({ visible, onClose, note }) => {
     return `${note.title || "document"}.pdf`;
   };
 
+  // Mozilla PDF.js viewer URL to cleanly embed and render PDFs inside modal iframe
+  const getEmbedUrl = (url) => {
+    if (!url) return "";
+    if (url.includes("drive.google.com/file/d/")) {
+      return url.replace(/\/view.*$/, "/preview");
+    }
+    if (isPdf && !isImage) {
+      return `https://mozilla.github.io/pdf.js/web/viewer.html?file=${encodeURIComponent(url)}`;
+    }
+    return url;
+  };
+
   const handleOpenExternal = () => {
     if (!rawUrl) return;
     window.open(rawUrl, "_blank", "noopener,noreferrer");
@@ -288,22 +300,9 @@ const PreviewModal = ({ visible, onClose, note }) => {
                     }}
                   />
                 </div>
-              ) : isPdf ? (
-                <object
-                  data={rawUrl}
-                  type="application/pdf"
-                  style={{ width: "100%", height: "100%" }}
-                >
-                  <div style={{ textAlign: "center", padding: "40px", color: "#94a3b8" }}>
-                    <p style={{ marginBottom: "12px" }}>Direct PDF preview is restricted by browser policy.</p>
-                    <Button type="primary" onClick={handleOpenExternal} style={{ background: "#6366f1" }}>
-                      Open Document in New Tab
-                    </Button>
-                  </div>
-                </object>
               ) : (
                 <iframe
-                  src={rawUrl}
+                  src={getEmbedUrl(rawUrl)}
                   title="Document Preview"
                   style={{
                     width: "100%",
