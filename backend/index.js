@@ -1,5 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
+import dns from "node:dns";
 import cors from "cors";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -11,38 +12,36 @@ import avatarRouter from "./src/Routes/Avatar.routes.js";
 import notesRouter from "./src/Routes/Notes.routes.js";
 import aiRouter from "./src/Routes/AI.routes.js";
 import quizRouter from "./src/Routes/Quiz.routes.js";
-
-import ConnectDB from "./src/Config/db.js";
+import connectDB from "./src/Config/db.js";
 
 dotenv.config();
-const app = express();
 
+// Localhost DNS resolve fix (Vercel par execute nahi hoga)
+if (process.env.NODE_ENV !== "production" && !process.env.VERCEL) {
+  dns.setServers(["8.8.8.8", "1.1.1.1"]);
+}
+
+const app = express();
 app.set("trust proxy", 1);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Database Connection
-ConnectDB();
+connectDB();
 
-// Dynamic CORS configuration (Localhost + Vercel deployment domains)
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps, curl, or server-to-server)
       if (!origin) return callback(null, true);
-      
       const allowedOrigins = [
         "http://localhost:5173",
         "http://localhost:3000",
       ];
-      
-      // Allow all vercel preview & production domains automatically
       if (allowedOrigins.includes(origin) || origin.endsWith(".vercel.app")) {
         return callback(null, true);
       }
-      
-      return callback(null, true); // Safe fallback for testing
+      return callback(null, true);
     },
     credentials: true,
   })
@@ -79,13 +78,11 @@ app.get("/", (req, res) => {
   });
 });
 
-// Local development ke liye listen karega
-if (process.env.NODE_ENV !== "production") {
+if (process.env.NODE_ENV !== "production" && !process.env.VERCEL) {
   const port = process.env.PORT || 5000;
   app.listen(port, () => {
     console.log(`Server running on port ${port}`);
   });
 }
 
-// 👈 Vercel serverless runtime ke liye compulsory export
 export default app;
