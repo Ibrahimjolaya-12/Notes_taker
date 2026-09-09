@@ -1,9 +1,9 @@
 import { Routes, Route } from "react-router-dom";
-import AddTodo from "./addTodo";
 import ShowTodos from "./ShowTodos";
 import UpdateTodo from "./UpdateTodo";
 import ViewTodo from "./ViewTodo";
 import SearchBtn from "./SearchBtn";
+import AddTodo from "./AddTodo";
 
 const Todos = () => {
   return (
