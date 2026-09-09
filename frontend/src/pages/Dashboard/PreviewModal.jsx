@@ -10,22 +10,33 @@ import axios from "axios";
 
 const { useBreakpoint } = Grid;
 
+// Environment-aware dynamic backend base URL
+const BACKEND_URL =
+  process.env.NODE_ENV === "production" || window.location.hostname !== "localhost"
+    ? "https://class-notes-backend.vercel.app"
+    : "http://localhost:5000";
+
 const PreviewModal = ({ visible, onClose, note }) => {
   const screens = useBreakpoint();
   const isMobile = !screens.sm;
 
   if (!note) return null;
 
-  // 1. URL Resolution logic
+  // 1. Dynamic URL Resolution logic
   let rawUrl = note.fileUrl || note.driveLink || "";
-  if (rawUrl.startsWith("/uploads")) {
-    rawUrl = `https://class-notes-backend.vercel.app${rawUrl}`;
+  
+  if (rawUrl.startsWith("http://localhost:5000") || rawUrl.startsWith("https://class-notes-backend.vercel.app")) {
+    // Replace old/static domain with current environment's active BACKEND_URL
+    const pathPart = rawUrl.replace(/^https?:\/\/[^/]+/, "");
+    rawUrl = `${BACKEND_URL}${pathPart}`;
+  } else if (rawUrl.startsWith("/uploads")) {
+    rawUrl = `${BACKEND_URL}${rawUrl}`;
   } else if (rawUrl && !rawUrl.startsWith("http") && !rawUrl.includes("drive.google.com")) {
-    rawUrl = `https://class-notes-backend.vercel.app/uploads/${rawUrl}`;
+    rawUrl = `${BACKEND_URL}/uploads/${rawUrl}`;
   }
 
   const isPdf = rawUrl.toLowerCase().endsWith(".pdf") || rawUrl.includes("drive.google.com");
-  const isImage = /\.(jpg|jpeg|png|webp|gif|svg)$/i.test(rawUrl);
+  const isImage = /\.(jpg|jpeg|png|webp|gif|svg)$/i.test(rawUrl) || rawUrl.includes("/uploads/");
   const isGoogleDrive = rawUrl.includes("drive.google.com");
 
   // File Name resolver
