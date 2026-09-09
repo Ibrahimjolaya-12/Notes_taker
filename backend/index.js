@@ -16,7 +16,7 @@ import connectDB from "./src/Config/db.js";
 
 dotenv.config();
 
-// Localhost DNS resolve fix (Vercel par execute nahi hoga)
+// Local DNS resolve fix
 if (process.env.NODE_ENV !== "production" && !process.env.VERCEL) {
   dns.setServers(["8.8.8.8", "1.1.1.1"]);
 }
@@ -30,18 +30,24 @@ const __dirname = path.dirname(__filename);
 // Database Connection
 connectDB();
 
+// Fixed CORS Setup
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "https://class-notes-sable.vercel.app",
+];
+
 app.use(
   cors({
     origin: (origin, callback) => {
       if (!origin) return callback(null, true);
-      const allowedOrigins = [
-        "http://localhost:5173",
-        "http://localhost:3000",
-      ];
-      if (allowedOrigins.includes(origin) || origin.endsWith(".vercel.app")) {
+      if (
+        allowedOrigins.includes(origin) ||
+        origin.endsWith(".vercel.app")
+      ) {
         return callback(null, true);
       }
-      return callback(null, true);
+      return callback(new Error("CORS policy violation: Access Denied"), false);
     },
     credentials: true,
   })
@@ -50,17 +56,20 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.use(
-  "/uploads",
-  express.static(path.join(__dirname, "public/temp"), {
-    setHeaders: (res, filePath) => {
-      if (filePath.endsWith(".pdf")) {
-        res.setHeader("Content-Type", "application/pdf");
-        res.setHeader("Content-Disposition", "inline");
-      }
-    },
-  })
-);
+// Local-only static uploads (Production relies on Cloudinary)
+if (process.env.NODE_ENV !== "production" && !process.env.VERCEL) {
+  app.use(
+    "/uploads",
+    express.static(path.join(__dirname, "public/temp"), {
+      setHeaders: (res, filePath) => {
+        if (filePath.endsWith(".pdf")) {
+          res.setHeader("Content-Type", "application/pdf");
+          res.setHeader("Content-Disposition", "inline");
+        }
+      },
+    })
+  );
+}
 
 // Routes
 app.use("/api/auth", userRouter);
