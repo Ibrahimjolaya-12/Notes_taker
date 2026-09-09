@@ -7,6 +7,8 @@ import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 
 const { useBreakpoint } = Grid;
 
+const BACKEND_URL = "https://class-notes-backend.vercel.app";
+
 const Dashhome = () => {
   const navigate = useNavigate();
   const [subjects, setSubjects] = useState([]);
@@ -20,7 +22,7 @@ const Dashhome = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem("token");
-      const res = await axios.get("http://localhost:5000/api/subjects/my-subjects", {
+      const res = await axios.get(`${BACKEND_URL}/api/subjects/my-subjects`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -69,7 +71,7 @@ const Dashhome = () => {
   const handleDelete = async (subjectId) => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.delete(`http://localhost:5000/api/subjects/${subjectId}`, {
+      const res = await axios.delete(`${BACKEND_URL}/api/subjects/${subjectId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
