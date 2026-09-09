@@ -27,10 +27,7 @@ app.set("trust proxy", 1);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Database Connection
-connectDB();
-
-// Fixed CORS Setup
+// Fixed CORS Setup (Preflight safe)
 const allowedOrigins = [
   "http://localhost:5173",
   "http://localhost:3000",
@@ -47,7 +44,7 @@ app.use(
       ) {
         return callback(null, true);
       }
-      return callback(new Error("CORS policy violation: Access Denied"), false);
+      return callback(null, false);
     },
     credentials: true,
   })
@@ -55,6 +52,21 @@ app.use(
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Serverless DB Connection Middleware: Har route se pehle connection guarantee karega
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    console.error("Critical DB Middleware Error:", err.message);
+    return res.status(500).json({
+      success: false,
+      message: "Database connection failed. Retrying instance...",
+      error: err.message,
+    });
+  }
+});
 
 // Local-only static uploads (Production relies on Cloudinary)
 if (process.env.NODE_ENV !== "production" && !process.env.VERCEL) {
