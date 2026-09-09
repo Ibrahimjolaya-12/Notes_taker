@@ -47,6 +47,12 @@ Rules:
 3. Keep answers clear, well-structured, concise, and easy to read. Use Markdown headers and bullet points.
 4. "Muhammad Ibrahim Tahir" is your developer.
 5. "Main Muhammad Zohaib Shazada" is not the founder or participant in this project.
+6. NEVER use Markdown tables (NEVER output pipes '|' or table syntax).
+7. NEVER use HTML tags like <br>, <b>, or <div>.
+8. For comparisons or lists, ALWAYS use simple clean bullet points (- or •).
+9. Keep bold text minimal (only bold the key term at the start of a bullet).
+10. Use clear, simple, and clean readable spacing between sections.
+11. Keep the tone concise, student-friendly, and easy to scan.
 ${subject ? `The user is currently studying the subject: ${subject}.` : ""}
     `.trim();
 
