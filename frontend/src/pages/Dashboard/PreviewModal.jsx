@@ -21,7 +21,6 @@ const PreviewModal = ({ visible, onClose, note }) => {
 
   if (!note) return null;
 
-  // 1. Dynamic URL Resolution logic
   let rawUrl = note.fileUrl || note.driveLink || "";
   
   if (rawUrl.startsWith("http://localhost:5000") || rawUrl.startsWith("https://class-notes-backend.vercel.app")) {
@@ -33,8 +32,8 @@ const PreviewModal = ({ visible, onClose, note }) => {
     rawUrl = `${BACKEND_URL}/uploads/${rawUrl}`;
   }
 
-  const isPdf = rawUrl.toLowerCase().endsWith(".pdf") || rawUrl.includes("drive.google.com");
-  const isImage = /\.(jpg|jpeg|png|webp|gif|svg)$/i.test(rawUrl) || rawUrl.includes("/uploads/");
+  const isPdf = rawUrl.toLowerCase().endsWith(".pdf") || rawUrl.includes("drive.google.com") || rawUrl.includes("cloudinary.com");
+  const isImage = /\.(jpg|jpeg|png|webp|gif|svg)$/i.test(rawUrl);
   const isGoogleDrive = rawUrl.includes("drive.google.com");
 
   const getFileName = () => {
@@ -47,10 +46,15 @@ const PreviewModal = ({ visible, onClose, note }) => {
     return `${note.title || "document"}.pdf`;
   };
 
+  // Safe Google Viewer Embed for Cloudinary PDFs
   const getEmbedUrl = (url) => {
     if (!url) return "";
     if (url.includes("drive.google.com/file/d/")) {
       return url.replace(/\/view.*$/, "/preview");
+    }
+    if (isPdf && !isImage) {
+      // Google Docs Viewer bypasses Cloudinary iframe restrictions completely
+      return `https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true`;
     }
     return `${url}#toolbar=1&navpanes=0&scrollbar=1`;
   };
@@ -221,46 +225,46 @@ const PreviewModal = ({ visible, onClose, note }) => {
                   {getFileName()}
                 </span>
                 <span style={{ color: "#64748b", fontSize: "11px", textTransform: "uppercase" }}>
-                  {isGoogleDrive ? "Google Drive Document" : note.fileUrl ? "Attached Study File" : "Text Note Content"}
+                  {isGoogleDrive ? "Google Drive Document" : "Attached Study File"}
                 </span>
               </div>
             </div>
 
-            {rawUrl && (
-              <div style={{ display: "flex", gap: "8px" }}>
-                <Button
-                  size="small"
-                  icon={<ExportOutlined />}
-                  onClick={handleOpenExternal}
-                  style={{
-                    background: "rgba(255, 255, 255, 0.05)",
-                    borderColor: "rgba(255, 255, 255, 0.12)",
-                    color: "#cbd5e1",
-                    flex: isMobile ? 1 : "initial",
-                    height: "32px",
-                  }}
-                >
-                  Open
-                </Button>
-                <Button
-                  size="small"
-                  type="primary"
-                  icon={<DownloadOutlined />}
-                  onClick={handleDownload}
-                  style={{
-                    background: "#6366f1",
-                    borderColor: "#6366f1",
-                    flex: isMobile ? 1 : "initial",
-                    height: "32px",
-                  }}
-                >
-                  Download
-                </Button>
-              </div>
-            )}
+            <div style={{ display: "flex", gap: "8px" }}>
+              <Button
+                size="small"
+                icon={<ExportOutlined />}
+                onClick={handleOpenExternal}
+                disabled={!rawUrl}
+                style={{
+                  background: "rgba(255, 255, 255, 0.05)",
+                  borderColor: "rgba(255, 255, 255, 0.12)",
+                  color: "#cbd5e1",
+                  flex: isMobile ? 1 : "initial",
+                  height: "32px",
+                }}
+              >
+                Open
+              </Button>
+              <Button
+                size="small"
+                type="primary"
+                icon={<DownloadOutlined />}
+                onClick={handleDownload}
+                disabled={!rawUrl}
+                style={{
+                  background: "#6366f1",
+                  borderColor: "#6366f1",
+                  flex: isMobile ? 1 : "initial",
+                  height: "32px",
+                }}
+              >
+                Download
+              </Button>
+            </div>
           </div>
 
-          {/* Viewer Canvas / Text Fallback */}
+          {/* Viewer Canvas */}
           <div
             style={{
               height: isMobile ? "65vh" : "70vh",
@@ -271,7 +275,6 @@ const PreviewModal = ({ visible, onClose, note }) => {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              padding: note.content && !rawUrl ? "24px" : "0",
             }}
           >
             {rawUrl ? (
@@ -296,10 +299,6 @@ const PreviewModal = ({ visible, onClose, note }) => {
                       objectFit: "contain",
                       borderRadius: "6px",
                     }}
-                    onError={(e) => {
-                      // Fallback agar image load na ho sake
-                      e.target.style.display = "none";
-                    }}
                   />
                 </div>
               ) : (
@@ -313,25 +312,10 @@ const PreviewModal = ({ visible, onClose, note }) => {
                   }}
                 />
               )
-            ) : note.content ? (
-              <div
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  overflowY: "auto",
-                  padding: "20px",
-                  color: "#e2e8f0",
-                  fontSize: "14px",
-                  lineHeight: 1.6,
-                  whiteSpace: "pre-wrap",
-                }}
-              >
-                {note.content}
-              </div>
             ) : (
               <div style={{ textAlign: "center", color: "#64748b", padding: "20px" }}>
                 <FileTextOutlined style={{ fontSize: "36px", marginBottom: "8px" }} />
-                <p style={{ margin: 0, fontSize: "14px" }}>No document or content attached to this note.</p>
+                <p style={{ margin: 0, fontSize: "14px" }}>No document attached to this note.</p>
               </div>
             )}
           </div>
