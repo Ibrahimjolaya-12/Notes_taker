@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Modal, Button, ConfigProvider, message, Grid } from "antd";
 import {
   CloseOutlined,
@@ -14,6 +15,13 @@ const PreviewModal = ({ visible, onClose, note }) => {
   const screens = useBreakpoint();
   const isMobile = !screens.sm;
 
+  // Maximum 12 pages tak scan karega, jo page exist nahi karega woh onError par remove ho jayega
+  const [pages, setPages] = useState([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+
+  useEffect(() => {
+    setPages([1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+  }, [note?._id, note?.fileUrl]);
+
   if (!note) return null;
 
   let rawUrl = note.fileUrl || note.driveLink || "";
@@ -25,12 +33,22 @@ const PreviewModal = ({ visible, onClose, note }) => {
   const isImage = /\.(jpg|jpeg|png|webp|gif|svg)$/i.test(rawUrl);
   const isGoogleDrive = rawUrl.includes("drive.google.com");
 
-  const getDocumentRenderUrl = () => {
-    if (!rawUrl) return "";
-    if (rawUrl.includes("cloudinary.com") && isPdf) {
-      return rawUrl.replace(/\.pdf(\?.*)?$/i, ".jpg$1");
+  // Multi-page Cloudinary PDF URL generator
+  const getCloudinaryPageUrl = (url, pageNumber) => {
+    if (!url) return "";
+    if (url.includes("cloudinary.com") && isPdf) {
+      const pageInjected = url.replace(
+        /\/upload\/(pg_\d+\/)?/,
+        `/upload/pg_${pageNumber}/`
+      );
+      return pageInjected.replace(/\.pdf(\?.*)?$/i, ".jpg$1");
     }
-    return rawUrl;
+    return url;
+  };
+
+  // Jab aakhri page ke baad 404 aaye toh baaqi pages ko discard kar dega
+  const handlePageError = (failedPage) => {
+    setPages((prev) => prev.filter((p) => p < failedPage));
   };
 
   const getFileName = () => {
@@ -83,8 +101,6 @@ const PreviewModal = ({ visible, onClose, note }) => {
     }
   };
 
-  const displayUrl = getDocumentRenderUrl();
-
   return (
     <ConfigProvider
       theme={{
@@ -95,27 +111,22 @@ const PreviewModal = ({ visible, onClose, note }) => {
         },
       }}
     >
-      {/* Custom visible scrollbar styling */}
       <style>{`
-        .custom-document-scroll {
+        .sheet-scroll-container {
           overflow-y: scroll !important;
-          overflow-x: hidden;
+          overflow-x: hidden !important;
           scrollbar-width: thin;
-          scrollbar-color: #6366f1 rgba(255, 255, 255, 0.06);
+          scrollbar-color: #6366f1 #0a0b16;
         }
-        .custom-document-scroll::-webkit-scrollbar {
+        .sheet-scroll-container::-webkit-scrollbar {
           width: 8px;
         }
-        .custom-document-scroll::-webkit-scrollbar-track {
-          background: rgba(255, 255, 255, 0.05);
-          border-radius: 8px;
+        .sheet-scroll-container::-webkit-scrollbar-track {
+          background: #0a0b16;
         }
-        .custom-document-scroll::-webkit-scrollbar-thumb {
+        .sheet-scroll-container::-webkit-scrollbar-thumb {
           background: #6366f1;
-          border-radius: 8px;
-        }
-        .custom-document-scroll::-webkit-scrollbar-thumb:hover {
-          background: #818cf8;
+          border-radius: 4px;
         }
       `}</style>
 
@@ -125,7 +136,7 @@ const PreviewModal = ({ visible, onClose, note }) => {
         footer={null}
         closable={false}
         centered
-        width={isMobile ? "96%" : 880}
+        width={isMobile ? "96%" : 900}
         styles={{
           mask: {
             backdropFilter: "blur(8px)",
@@ -140,8 +151,8 @@ const PreviewModal = ({ visible, onClose, note }) => {
           },
         }}
       >
-        <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-          {/* Header */}
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          {/* Top Header */}
           <div
             style={{
               display: "flex",
@@ -187,7 +198,7 @@ const PreviewModal = ({ visible, onClose, note }) => {
             />
           </div>
 
-          {/* Pill Bar */}
+          {/* Action Bar */}
           <div
             style={{
               display: "flex",
@@ -199,25 +210,16 @@ const PreviewModal = ({ visible, onClose, note }) => {
               border: "1px solid rgba(255, 255, 255, 0.06)",
               borderRadius: "10px",
               padding: "10px 14px",
-              marginBottom: "12px",
+              marginBottom: "14px",
             }}
           >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "10px",
-                minWidth: 0,
-              }}
-            >
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0 }}>
               <div
                 style={{
                   width: "34px",
                   height: "34px",
                   borderRadius: "8px",
-                  background: isPdf
-                    ? "rgba(99, 102, 241, 0.2)"
-                    : "rgba(239, 68, 68, 0.2)",
+                  background: isPdf ? "rgba(99, 102, 241, 0.2)" : "rgba(239, 68, 68, 0.2)",
                   color: isPdf ? "#818cf8" : "#ef4444",
                   display: "flex",
                   alignItems: "center",
@@ -242,18 +244,8 @@ const PreviewModal = ({ visible, onClose, note }) => {
                 >
                   {getFileName()}
                 </span>
-                <span
-                  style={{
-                    color: "#64748b",
-                    fontSize: "11px",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  {isGoogleDrive
-                    ? "GOOGLE DRIVE FILE"
-                    : isPdf
-                    ? "PDF DOCUMENT"
-                    : "ATTACHED DOCUMENT"}
+                <span style={{ color: "#64748b", fontSize: "11px", textTransform: "uppercase" }}>
+                  {isGoogleDrive ? "GOOGLE DRIVE FILE" : isPdf ? "PDF DOCUMENT" : "IMAGE ATTACHMENT"}
                 </span>
               </div>
             </div>
@@ -291,48 +283,91 @@ const PreviewModal = ({ visible, onClose, note }) => {
             </div>
           </div>
 
-          {/* Document Canvas (Natural block scroll flow) */}
+          {/* Document Canvas (Natural block flow, solves half-image and clipping bug) */}
           <div
-            className="custom-document-scroll"
+            className="sheet-scroll-container"
             style={{
-              height: isMobile ? "65vh" : "72vh",
-              background: "#141522",
+              height: isMobile ? "68vh" : "72vh",
+              background: "#0a0b16",
               border: "1px solid rgba(255, 255, 255, 0.08)",
               borderRadius: "12px",
-              padding: "20px 14px",
+              padding: isMobile ? "12px 6px" : "20px 14px",
+              display: "block",
             }}
           >
-            {displayUrl ? (
-              <div
-                style={{
-                  width: "100%",
-                  maxWidth: "760px",
-                  margin: "0 auto",
-                  background: "#ffffff",
-                  boxShadow: "0 10px 30px rgba(0,0,0,0.6)",
-                  borderRadius: "6px",
-                  overflow: "hidden",
-                }}
-              >
-                <img
-                  src={displayUrl}
-                  alt="Document Page"
+            {rawUrl ? (
+              isGoogleDrive ? (
+                <iframe
+                  src={rawUrl.replace(/\/view.*$/, "/preview")}
+                  title="Document Preview"
+                  style={{ width: "100%", height: "100%", border: "none" }}
+                />
+              ) : isImage ? (
+                /* Full Single Image View */
+                <div
                   style={{
-                    width: "100%",
-                    height: "auto",
+                    maxWidth: "780px",
+                    margin: "0 auto",
                     display: "block",
                   }}
-                  onError={(e) => {
-                    e.target.style.display = "none";
-                    const iframe = document.createElement("iframe");
-                    iframe.src = rawUrl;
-                    iframe.style.width = "100%";
-                    iframe.style.height = "70vh";
-                    iframe.style.border = "none";
-                    e.target.parentNode.appendChild(iframe);
-                  }}
-                />
-              </div>
+                >
+                  <img
+                    src={rawUrl}
+                    alt="Note Attachment"
+                    style={{
+                      width: "100%",
+                      height: "auto",
+                      display: "block",
+                      borderRadius: "6px",
+                      boxShadow: "0 8px 30px rgba(0,0,0,0.6)",
+                    }}
+                  />
+                </div>
+              ) : (
+                /* Multi-Page PDF Sheet Stacking */
+                <div style={{ maxWidth: "780px", margin: "0 auto" }}>
+                  {pages.map((pageNum) => (
+                    <div
+                      key={pageNum}
+                      style={{
+                        marginBottom: "24px",
+                        position: "relative",
+                      }}
+                    >
+                      <div
+                        style={{
+                          background: "#ffffff",
+                          boxShadow: "0 8px 30px rgba(0,0,0,0.7)",
+                          borderRadius: "4px",
+                          overflow: "hidden",
+                        }}
+                      >
+                        <img
+                          src={getCloudinaryPageUrl(rawUrl, pageNum)}
+                          alt={`Page ${pageNum}`}
+                          style={{
+                            width: "100%",
+                            height: "auto",
+                            display: "block",
+                          }}
+                          onError={() => handlePageError(pageNum)}
+                        />
+                      </div>
+                      <div
+                        style={{
+                          textAlign: "center",
+                          color: "#64748b",
+                          fontSize: "11px",
+                          marginTop: "6px",
+                          fontWeight: 500,
+                        }}
+                      >
+                        Page {pageNum}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )
             ) : (
               <div style={{ textAlign: "center", color: "#64748b", padding: "40px" }}>
                 <FileTextOutlined style={{ fontSize: "36px", marginBottom: "8px" }} />
