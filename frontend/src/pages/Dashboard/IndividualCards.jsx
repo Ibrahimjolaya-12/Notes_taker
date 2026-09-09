@@ -59,12 +59,12 @@ const IndividualCards = () => {
       setLoading(true);
       const headers = { Authorization: `Bearer ${token}` };
 
-      const subRes = await axios.get(`https://class-notes-backend.vercel.app/api/subjects/${id}`, { headers });
+      const subRes = await axios.get(`http://localhost:5000/api/subjects/${id}`, { headers });
       if (subRes.data.success) {
         setSubject(subRes.data.subject);
       }
 
-      const notesRes = await axios.get(`https://class-notes-backend.vercel.app/api/notes/subject/${id}`, { headers });
+      const notesRes = await axios.get(`http://localhost:5000/api/notes/subject/${id}`, { headers });
       if (notesRes.data.success) {
         setNotes(notesRes.data.notes);
       }
@@ -87,7 +87,7 @@ const IndividualCards = () => {
       const token = localStorage.getItem("token");
 
       const res = await axios.post(
-        `https://class-notes-backend.vercel.app/api/notes/summarize-pdf/${note._id}`,
+        `http://localhost:5000/api/notes/summarize-pdf/${note._id}`,
         {},
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -150,7 +150,7 @@ const IndividualCards = () => {
   const handleDeleteNote = async (noteId) => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.delete(`https://class-notes-backend.vercel.app/api/notes/${noteId}`, {
+      const res = await axios.delete(`http://localhost:5000/api/notes/${noteId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 

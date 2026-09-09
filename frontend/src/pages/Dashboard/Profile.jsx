@@ -24,6 +24,8 @@ import axios from "axios";
 
 const { useBreakpoint } = Grid;
 
+const BACKEND_URL = "https://class-notes-backend.vercel.app";
+
 const Profile = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -55,7 +57,7 @@ const Profile = () => {
         setEmail(storedUser.email || "");
         setSemester(storedUser.semester || "Semester 1");
 
-        const res = await axios.get("https://class-notes-backend.vercel.app/api/avatar/me", {
+        const res = await axios.get(`${BACKEND_URL}/api/avatar/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         if (res.data?.success && res.data?.avatar) {
@@ -95,7 +97,7 @@ const Profile = () => {
       if (selectedFile) {
         const data = new FormData();
         data.append("avatar", selectedFile);
-        await axios.post("https://class-notes-backend.vercel.app/api/avatar/upload", data, {
+        await axios.post(`${BACKEND_URL}/api/avatar/upload`, data, {
           headers: {
             ...headers,
             "Content-Type": "multipart/form-data",
@@ -105,7 +107,7 @@ const Profile = () => {
 
       // Step B: Update Semester
       const semRes = await axios.put(
-        "https://class-notes-backend.vercel.app/api/avatar/sem",
+        `${BACKEND_URL}/api/avatar/sem`,
         { semester },
         { headers }
       );
@@ -153,7 +155,6 @@ const Profile = () => {
         },
       }}
     >
-      {/* Outer wrapper: Full-width column taake heading aur card upar-neeche center align hon */}
       <div
         style={{
           width: "100%",
@@ -209,7 +210,6 @@ const Profile = () => {
                 textAlign: isMobile ? "center" : "left",
               }}
             >
-              {/* Ant Design Image with Built-in Zoom Controls */}
               <div
                 style={{
                   width: "96px",
