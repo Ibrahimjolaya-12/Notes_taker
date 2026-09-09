@@ -30,7 +30,7 @@ const QuizModal = ({ open, onCancel, subjectId, subjectName }) => {
       setLoading(true);
       const token = localStorage.getItem("token");
       const res = await axios.post(
-        `http://localhost:5000/api/quiz/generate/${subjectId}`,
+        `https://class-notes-backend.vercel.app/api/quiz/generate/${subjectId}`,
         { count: questionCount },
         { headers: { Authorization: `Bearer ${token}` } }
       );
