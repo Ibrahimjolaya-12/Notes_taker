@@ -2,7 +2,6 @@ import jwt from "jsonwebtoken";
 
 const auth = (req, res, next) => {
   try {
-    // Case-insensitive header check
     const authHeader = req.headers.authorization || req.headers.Authorization;
     let token = null;
 
@@ -25,15 +24,16 @@ const auth = (req, res, next) => {
 
     const secret = process.env.SECRET_TOKEN;
     if (!secret) {
-      console.error("SECRET_TOKEN environment variable missing!");
       return res.status(500).json({ 
         success: false, 
-        message: "Server configuration error" 
+        message: "Server configuration error: SECRET_TOKEN missing" 
       });
     }
 
     const decoded = jwt.verify(token, secret);
+    // Token ke andar 'id' ya '_id' ya 'userId' jo bhi ho, sab ko cover karega
     req.user = decoded; 
+    req.userId = decoded.id || decoded._id || decoded.userId || decoded.uid;
 
     next();
   } catch (err) {

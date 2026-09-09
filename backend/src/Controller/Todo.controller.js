@@ -1,5 +1,9 @@
 import Todo from "../Models/Todo.Model.js";
 
+const getUserId = (req) => {
+  return req.userId || req.user?.id || req.user?._id || req.user?.userId || req.user?.uid;
+};
+
 // 1. Add new todo
 export const addTodos = async (req, res) => {
   try {
@@ -12,8 +16,7 @@ export const addTodos = async (req, res) => {
       });
     }
 
-    const userId =
-      req.user?.userId || req.user?._id || req.user?.id || req.user?.uid;
+    const userId = getUserId(req);
     if (!userId) {
       return res.status(401).json({
         success: false,
@@ -55,8 +58,7 @@ export const addTodos = async (req, res) => {
 // 2. Get all todos with search functionality
 export const getAllTodos = async (req, res) => {
   try {
-    const userId =
-      req.user?.userId || req.user?._id || req.user?.id || req.user?.uid;
+    const userId = getUserId(req);
 
     if (!userId) {
       return res.status(401).json({
@@ -65,17 +67,13 @@ export const getAllTodos = async (req, res) => {
       });
     }
 
-    // 1. Search aur Status dono query se nikaal lo jo URL k last per hoti ha jase /search=exam&status=complete
     const { search, status } = req.query;
-
     let filter = { user: userId };
 
-    // 2. Status Filter Logic
     if (status && status !== "all") {
-      filter.status = status.toLowerCase(); // 'complete' ya 'incomplete'
+      filter.status = status.toLowerCase();
     }
 
-    // 3. Search Filter Logic ($or ke zariye)
     if (search && search.trim() !== "") {
       const searchRegex = { $regex: search.trim(), $options: "i" };
       filter.$or = [
@@ -104,8 +102,7 @@ export const getAllTodos = async (req, res) => {
 // 3. View single todo
 export const viewTodo = async (req, res) => {
   try {
-    const userId =
-      req.user?.userId || req.user?.uid || req.user?.id || req.user?._id;
+    const userId = getUserId(req);
 
     if (!userId) {
       return res.status(401).json({
@@ -142,7 +139,7 @@ export const viewTodo = async (req, res) => {
 // 4. Edit todo
 export const editTodo = async (req, res) => {
   try {
-    const userId = req.user?.id || req.user?._id || req.user?.userId;
+    const userId = getUserId(req);
     const { title, description, location, dueDate, status } = req.body;
 
     const updatedData = {
@@ -150,11 +147,11 @@ export const editTodo = async (req, res) => {
       description,
       location,
       dueDate,
-      status
+      status,
     };
 
     if (status) {
-      updatedData.status = status.toLowerCase(); // 'complete' ya 'incomplete' ensure karo
+      updatedData.status = status.toLowerCase();
     }
 
     const todo = await Todo.findOneAndUpdate(
@@ -183,8 +180,7 @@ export const editTodo = async (req, res) => {
 // 5. Delete todo
 export const deleteTodo = async (req, res) => {
   try {
-    const userId =
-      req.user?.userId || req.user?._id || req.user?.id || req.user?.uid;
+    const userId = getUserId(req);
 
     if (!userId) {
       return res.status(401).json({
@@ -211,8 +207,6 @@ export const deleteTodo = async (req, res) => {
     });
   } catch (err) {
     console.error("DELETE TODO ERROR:", err.message);
-    return res
-      .status(500)
-      .json({ success: false, message: "Internal Server error" });
+    return res.status(500).json({ success: false, message: "Internal Server error" });
   }
 };
