@@ -46,6 +46,18 @@ const PreviewModal = ({ visible, onClose, note }) => {
     return `${note.title || "document"}.pdf`;
   };
 
+  // Google Docs Viewer wrapper forces Cloudinary PDFs to display nicely in iframe without errors
+  const getEmbedUrl = (url) => {
+    if (!url) return "";
+    if (url.includes("drive.google.com/file/d/")) {
+      return url.replace(/\/view.*$/, "/preview");
+    }
+    if (isPdf && !isImage && !url.includes("docs.google.com")) {
+      return `https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true`;
+    }
+    return url;
+  };
+
   const handleOpenExternal = () => {
     if (!rawUrl) return;
     window.open(rawUrl, "_blank", "noopener,noreferrer");
@@ -92,11 +104,11 @@ const PreviewModal = ({ visible, onClose, note }) => {
       theme={{
         algorithm: theme.darkAlgorithm,
         token: {
-          colorBgElevated: "#090a16",
+          colorBgElevated: "#080816",
           colorText: "#ffffff",
-          colorBorder: "#1e2238",
+          colorBorder: "#191b36",
           colorPrimary: "#6366f1",
-          borderRadiusLG: 16,
+          borderRadiusLG: 14,
         },
       }}
     >
@@ -106,69 +118,118 @@ const PreviewModal = ({ visible, onClose, note }) => {
         footer={null}
         closable={false}
         centered
-        width={isMobile ? "96%" : 920}
+        width={isMobile ? "96%" : 880}
         styles={{
-          mask: { backdropFilter: "blur(10px)", backgroundColor: "rgba(2, 6, 23, 0.82)" },
+          mask: { backdropFilter: "blur(8px)", backgroundColor: "rgba(3, 7, 18, 0.85)" },
           content: {
-            backgroundColor: "#090a16",
-            border: "1px solid rgba(255, 255, 255, 0.08)",
-            padding: isMobile ? "16px" : "22px 26px",
-            borderRadius: "18px",
-            boxShadow: "0 25px 60px rgba(0,0,0,0.9)",
+            backgroundColor: "#080816",
+            border: "1px solid rgba(255, 255, 255, 0.1)",
+            padding: isMobile ? "14px 12px" : "20px 24px",
+            borderRadius: "16px",
+            boxShadow: "0 25px 60px rgba(0,0,0,0.85)",
           },
         }}
       >
         <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-          {/* Elegant Top Bar */}
+          {/* Header */}
           <div
             style={{
               display: "flex",
               justifyContent: "space-between",
-              alignItems: "center",
+              alignItems: "flex-start",
               borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
-              paddingBottom: "14px",
-              marginBottom: "16px",
+              paddingBottom: "12px",
+              marginBottom: "12px",
+              gap: "10px",
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: "12px", minWidth: 0 }}>
+            <div style={{ minWidth: 0 }}>
+              <h3
+                style={{
+                  margin: 0,
+                  color: "#f8fafc",
+                  fontSize: isMobile ? "16px" : "18px",
+                  fontWeight: 700,
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                {note.title}
+              </h3>
+              <p
+                style={{
+                  margin: "3px 0 0",
+                  color: "#818cf8",
+                  fontSize: "12px",
+                  fontWeight: 500,
+                }}
+              >
+                {note.chapter || "Study Attachment"}
+              </p>
+            </div>
+
+            <Button
+              type="text"
+              icon={<CloseOutlined />}
+              onClick={onClose}
+              style={{ color: "#94a3b8", padding: 0 }}
+            />
+          </div>
+
+          {/* Meta Bar */}
+          <div
+            style={{
+              display: "flex",
+              flexDirection: isMobile ? "column" : "row",
+              justifyContent: "space-between",
+              alignItems: isMobile ? "stretch" : "center",
+              gap: "10px",
+              background: "#0e1124",
+              border: "1px solid rgba(255, 255, 255, 0.06)",
+              borderRadius: "10px",
+              padding: "10px 14px",
+              marginBottom: "12px",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0 }}>
               <div
                 style={{
-                  width: "40px",
-                  height: "40px",
-                  borderRadius: "10px",
+                  width: "32px",
+                  height: "32px",
+                  borderRadius: "8px",
                   background: isPdf ? "rgba(239, 68, 68, 0.15)" : "rgba(99, 102, 241, 0.15)",
                   color: isPdf ? "#ef4444" : "#818cf8",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  fontSize: "18px",
+                  fontSize: "16px",
                   flexShrink: 0,
-                  border: isPdf ? "1px solid rgba(239, 68, 68, 0.3)" : "1px solid rgba(99, 102, 241, 0.3)",
                 }}
               >
                 {isImage ? <FileTextOutlined /> : <FilePdfOutlined />}
               </div>
               <div style={{ minWidth: 0 }}>
-                <h3
+                <span
                   style={{
-                    margin: 0,
-                    color: "#f8fafc",
-                    fontSize: isMobile ? "15px" : "17px",
-                    fontWeight: 700,
+                    color: "#ffffff",
+                    fontSize: "13px",
+                    fontWeight: 600,
+                    display: "block",
                     whiteSpace: "nowrap",
                     overflow: "hidden",
                     textOverflow: "ellipsis",
                   }}
                 >
-                  {note.title}
-                </h3>
-                <span style={{ color: "#94a3b8", fontSize: "12px" }}>
-                  {note.chapter ? `${note.chapter} • ` : ""} {getFileName()}
+                  {getFileName()}
+                </span>
+                <span style={{ color: "#64748b", fontSize: "11px", textTransform: "uppercase" }}>
+                  {isGoogleDrive ? "Google Drive Document" : "Attached Study File"}
                 </span>
               </div>
             </div>
 
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <div style={{ display: "flex", gap: "8px" }}>
               <Button
                 size="small"
                 icon={<ExportOutlined />}
@@ -176,13 +237,13 @@ const PreviewModal = ({ visible, onClose, note }) => {
                 disabled={!rawUrl}
                 style={{
                   background: "rgba(255, 255, 255, 0.05)",
-                  borderColor: "rgba(255, 255, 255, 0.1)",
+                  borderColor: "rgba(255, 255, 255, 0.12)",
                   color: "#cbd5e1",
-                  height: "34px",
-                  borderRadius: "8px",
+                  flex: isMobile ? 1 : "initial",
+                  height: "32px",
                 }}
               >
-                {!isMobile && "Open"}
+                Open
               </Button>
               <Button
                 size="small"
@@ -193,29 +254,22 @@ const PreviewModal = ({ visible, onClose, note }) => {
                 style={{
                   background: "#6366f1",
                   borderColor: "#6366f1",
-                  height: "34px",
-                  borderRadius: "8px",
-                  fontWeight: 600,
+                  flex: isMobile ? 1 : "initial",
+                  height: "32px",
                 }}
               >
-                {!isMobile && "Download"}
+                Download
               </Button>
-              <Button
-                type="text"
-                icon={<CloseOutlined />}
-                onClick={onClose}
-                style={{ color: "#94a3b8", marginLeft: "4px", fontSize: "16px" }}
-              />
             </div>
           </div>
 
-          {/* Immersive Document Canvas */}
+          {/* Viewer Canvas */}
           <div
             style={{
-              height: isMobile ? "68vh" : "72vh",
-              background: "#02040a",
-              border: "1px solid rgba(255, 255, 255, 0.06)",
-              borderRadius: "14px",
+              height: isMobile ? "65vh" : "70vh",
+              background: "#03040a",
+              border: "1px solid rgba(255, 255, 255, 0.08)",
+              borderRadius: "12px",
               overflow: "hidden",
               display: "flex",
               alignItems: "center",
@@ -232,24 +286,24 @@ const PreviewModal = ({ visible, onClose, note }) => {
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    padding: "12px",
+                    padding: "10px",
                   }}
                 >
                   <img
                     src={rawUrl}
-                    alt="Preview"
+                    alt="Attachment Preview"
                     style={{
                       maxWidth: "100%",
                       maxHeight: "100%",
                       objectFit: "contain",
-                      borderRadius: "8px",
+                      borderRadius: "6px",
                     }}
                   />
                 </div>
               ) : (
                 <iframe
-                  src={rawUrl}
-                  title="PDF Viewer"
+                  src={getEmbedUrl(rawUrl)}
+                  title="Document Preview"
                   style={{
                     width: "100%",
                     height: "100%",
@@ -261,7 +315,7 @@ const PreviewModal = ({ visible, onClose, note }) => {
             ) : (
               <div style={{ textAlign: "center", color: "#64748b", padding: "20px" }}>
                 <FileTextOutlined style={{ fontSize: "36px", marginBottom: "8px" }} />
-                <p style={{ margin: 0, fontSize: "14px" }}>No document attached.</p>
+                <p style={{ margin: 0, fontSize: "14px" }}>No document attached to this note.</p>
               </div>
             )}
           </div>
