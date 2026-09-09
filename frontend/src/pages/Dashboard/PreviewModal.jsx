@@ -10,24 +10,28 @@ import axios from "axios";
 
 const { useBreakpoint } = Grid;
 
-const BACKEND_URL =
-  import.meta.env.MODE === "production" || window.location.hostname !== "localhost"
-    ? "https://class-notes-backend.vercel.app"
-    : "http://localhost:5000";
-
 const PreviewModal = ({ visible, onClose, note }) => {
   const screens = useBreakpoint();
   const isMobile = !screens.sm;
 
   if (!note) return null;
 
-  // Direct backend native streaming link
-  const fileStreamUrl = note._id ? `${BACKEND_URL}/api/notes/view-file/${note._id}` : (note.fileUrl || "");
-  const rawUrl = note.fileUrl || note.driveLink || "";
+  let rawUrl = note.fileUrl || note.driveLink || "";
 
-  const isPdf = rawUrl.toLowerCase().endsWith(".pdf") || rawUrl.includes("cloudinary.com") || rawUrl.includes("drive.google.com");
+  const isPdf =
+    rawUrl.toLowerCase().endsWith(".pdf") ||
+    rawUrl.includes("cloudinary.com") ||
+    rawUrl.includes("drive.google.com");
   const isImage = /\.(jpg|jpeg|png|webp|gif|svg)$/i.test(rawUrl);
   const isGoogleDrive = rawUrl.includes("drive.google.com");
+
+  const getDocumentRenderUrl = () => {
+    if (!rawUrl) return "";
+    if (rawUrl.includes("cloudinary.com") && isPdf) {
+      return rawUrl.replace(/\.pdf(\?.*)?$/i, ".jpg$1");
+    }
+    return rawUrl;
+  };
 
   const getFileName = () => {
     if (note.fileUrl) {
@@ -40,16 +44,30 @@ const PreviewModal = ({ visible, onClose, note }) => {
   };
 
   const handleOpenExternal = () => {
-    if (!fileStreamUrl) return;
-    window.open(fileStreamUrl, "_blank", "noopener,noreferrer");
+    if (!rawUrl) return;
+    window.open(rawUrl, "_blank", "noopener,noreferrer");
   };
 
   const handleDownload = async () => {
-    if (!fileStreamUrl) return;
+    if (!rawUrl) return;
+
+    if (isGoogleDrive) {
+      const driveMatch = rawUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+      if (driveMatch && driveMatch[1]) {
+        return window.open(
+          `https://drive.google.com/uc?export=download&id=${driveMatch[1]}`,
+          "_blank"
+        );
+      }
+      return window.open(rawUrl, "_blank");
+    }
+
     try {
       message.loading({ content: "Downloading...", key: "dl" });
-      const response = await axios.get(fileStreamUrl, { responseType: "blob" });
-      const blob = new Blob([response.data], { type: isPdf ? "application/pdf" : "image/jpeg" });
+      const response = await axios.get(rawUrl, { responseType: "blob" });
+      const blob = new Blob([response.data], {
+        type: isPdf ? "application/pdf" : "image/jpeg",
+      });
       const blobUrl = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = blobUrl;
@@ -60,10 +78,12 @@ const PreviewModal = ({ visible, onClose, note }) => {
       window.URL.revokeObjectURL(blobUrl);
       message.success({ content: "Downloaded!", key: "dl" });
     } catch (err) {
-      window.open(fileStreamUrl, "_blank");
+      window.open(rawUrl, "_blank");
       message.destroy("dl");
     }
   };
+
+  const displayUrl = getDocumentRenderUrl();
 
   return (
     <ConfigProvider
@@ -75,6 +95,30 @@ const PreviewModal = ({ visible, onClose, note }) => {
         },
       }}
     >
+      {/* Custom visible scrollbar styling */}
+      <style>{`
+        .custom-document-scroll {
+          overflow-y: scroll !important;
+          overflow-x: hidden;
+          scrollbar-width: thin;
+          scrollbar-color: #6366f1 rgba(255, 255, 255, 0.06);
+        }
+        .custom-document-scroll::-webkit-scrollbar {
+          width: 8px;
+        }
+        .custom-document-scroll::-webkit-scrollbar-track {
+          background: rgba(255, 255, 255, 0.05);
+          border-radius: 8px;
+        }
+        .custom-document-scroll::-webkit-scrollbar-thumb {
+          background: #6366f1;
+          border-radius: 8px;
+        }
+        .custom-document-scroll::-webkit-scrollbar-thumb:hover {
+          background: #818cf8;
+        }
+      `}</style>
+
       <Modal
         open={visible}
         onCancel={onClose}
@@ -83,7 +127,10 @@ const PreviewModal = ({ visible, onClose, note }) => {
         centered
         width={isMobile ? "96%" : 880}
         styles={{
-          mask: { backdropFilter: "blur(8px)", backgroundColor: "rgba(3, 7, 18, 0.85)" },
+          mask: {
+            backdropFilter: "blur(8px)",
+            backgroundColor: "rgba(3, 7, 18, 0.85)",
+          },
           content: {
             backgroundColor: "#080816",
             border: "1px solid rgba(255, 255, 255, 0.1)",
@@ -94,7 +141,7 @@ const PreviewModal = ({ visible, onClose, note }) => {
         }}
       >
         <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
-          {/* 1. Header (Matches Demo) */}
+          {/* Header */}
           <div
             style={{
               display: "flex",
@@ -120,7 +167,14 @@ const PreviewModal = ({ visible, onClose, note }) => {
               >
                 {note.title}
               </h3>
-              <p style={{ margin: "3px 0 0", color: "#818cf8", fontSize: "12px", fontWeight: 500 }}>
+              <p
+                style={{
+                  margin: "3px 0 0",
+                  color: "#818cf8",
+                  fontSize: "12px",
+                  fontWeight: 500,
+                }}
+              >
                 {note.content || note.chapter || "Document Viewer"}
               </p>
             </div>
@@ -133,7 +187,7 @@ const PreviewModal = ({ visible, onClose, note }) => {
             />
           </div>
 
-          {/* 2. File Bar (Matches Demo Pill Bar) */}
+          {/* Pill Bar */}
           <div
             style={{
               display: "flex",
@@ -148,13 +202,22 @@ const PreviewModal = ({ visible, onClose, note }) => {
               marginBottom: "12px",
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0 }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                minWidth: 0,
+              }}
+            >
               <div
                 style={{
                   width: "34px",
                   height: "34px",
                   borderRadius: "8px",
-                  background: isPdf ? "rgba(99, 102, 241, 0.2)" : "rgba(239, 68, 68, 0.2)",
+                  background: isPdf
+                    ? "rgba(99, 102, 241, 0.2)"
+                    : "rgba(239, 68, 68, 0.2)",
                   color: isPdf ? "#818cf8" : "#ef4444",
                   display: "flex",
                   alignItems: "center",
@@ -179,8 +242,18 @@ const PreviewModal = ({ visible, onClose, note }) => {
                 >
                   {getFileName()}
                 </span>
-                <span style={{ color: "#64748b", fontSize: "11px", textTransform: "uppercase" }}>
-                  {isGoogleDrive ? "GOOGLE DRIVE FILE" : isPdf ? "PDF DOCUMENT" : "ATTACHED DOCUMENT"}
+                <span
+                  style={{
+                    color: "#64748b",
+                    fontSize: "11px",
+                    textTransform: "uppercase",
+                  }}
+                >
+                  {isGoogleDrive
+                    ? "GOOGLE DRIVE FILE"
+                    : isPdf
+                    ? "PDF DOCUMENT"
+                    : "ATTACHED DOCUMENT"}
                 </span>
               </div>
             </div>
@@ -218,39 +291,50 @@ const PreviewModal = ({ visible, onClose, note }) => {
             </div>
           </div>
 
-          {/* 3. Document Viewer Canvas (Native Browser PDF Viewer) */}
+          {/* Document Canvas (Natural block scroll flow) */}
           <div
+            className="custom-document-scroll"
             style={{
-              height: isMobile ? "65vh" : "70vh",
-              background: "#03040a",
+              height: isMobile ? "65vh" : "72vh",
+              background: "#141522",
               border: "1px solid rgba(255, 255, 255, 0.08)",
               borderRadius: "12px",
-              overflow: "hidden",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
+              padding: "20px 14px",
             }}
           >
-            {fileStreamUrl ? (
-              isImage ? (
-                <div style={{ width: "100%", height: "100%", overflow: "auto", display: "flex", alignItems: "center", justifyContent: "center", padding: "10px" }}>
-                  <img src={fileStreamUrl} alt="Preview" style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", borderRadius: "6px" }} />
-                </div>
-              ) : (
-                <object
-                  data={`${fileStreamUrl}#toolbar=1&navpanes=0&scrollbar=1`}
-                  type="application/pdf"
-                  style={{ width: "100%", height: "100%", border: "none" }}
-                >
-                  <iframe
-                    src={`${fileStreamUrl}#toolbar=1&navpanes=0&scrollbar=1`}
-                    title="Document Preview"
-                    style={{ width: "100%", height: "100%", border: "none", backgroundColor: "#ffffff" }}
-                  />
-                </object>
-              )
+            {displayUrl ? (
+              <div
+                style={{
+                  width: "100%",
+                  maxWidth: "760px",
+                  margin: "0 auto",
+                  background: "#ffffff",
+                  boxShadow: "0 10px 30px rgba(0,0,0,0.6)",
+                  borderRadius: "6px",
+                  overflow: "hidden",
+                }}
+              >
+                <img
+                  src={displayUrl}
+                  alt="Document Page"
+                  style={{
+                    width: "100%",
+                    height: "auto",
+                    display: "block",
+                  }}
+                  onError={(e) => {
+                    e.target.style.display = "none";
+                    const iframe = document.createElement("iframe");
+                    iframe.src = rawUrl;
+                    iframe.style.width = "100%";
+                    iframe.style.height = "70vh";
+                    iframe.style.border = "none";
+                    e.target.parentNode.appendChild(iframe);
+                  }}
+                />
+              </div>
             ) : (
-              <div style={{ textAlign: "center", color: "#64748b", padding: "20px" }}>
+              <div style={{ textAlign: "center", color: "#64748b", padding: "40px" }}>
                 <FileTextOutlined style={{ fontSize: "36px", marginBottom: "8px" }} />
                 <p style={{ margin: 0, fontSize: "14px" }}>No document attached to this note.</p>
               </div>
