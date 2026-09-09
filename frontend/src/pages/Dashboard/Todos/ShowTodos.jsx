@@ -31,6 +31,8 @@ import SearchBtn from "./SearchBtn";
 const { Option } = Select;
 const { useBreakpoint } = Grid;
 
+const BACKEND_URL = "https://class-notes-backend.vercel.app";
+
 const ShowTodos = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -56,7 +58,7 @@ const ShowTodos = () => {
       }
 
       const res = await axios.get(
-        `http://localhost:5000/api/todos/getAllTodos?status=${status}`,
+        `${BACKEND_URL}/api/todos/getAllTodos?status=${status}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -80,7 +82,7 @@ const ShowTodos = () => {
   const handleDelete = async (id) => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.delete(`http://localhost:5000/api/todos/${id}`, {
+      const res = await axios.delete(`${BACKEND_URL}/api/todos/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -133,7 +135,6 @@ const ShowTodos = () => {
     );
   };
 
-  // 👈 Dark themed Popconfirm Cancel Button properties
   const popconfirmCancelProps = {
     style: {
       backgroundColor: "#161b2b",

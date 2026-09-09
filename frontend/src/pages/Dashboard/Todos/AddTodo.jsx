@@ -9,6 +9,8 @@ const { Option } = Select;
 const { Title } = Typography;
 const { useBreakpoint } = Grid;
 
+const BACKEND_URL = "https://class-notes-backend.vercel.app";
+
 const AddTodo = () => {
   const navigate = useNavigate();
   const [form] = Form.useForm();
@@ -34,7 +36,7 @@ const AddTodo = () => {
       };
 
       const res = await axios.post(
-        "http://localhost:5000/api/todos/addTodos",
+        `${BACKEND_URL}/api/todos/addTodos`,
         payload,
         {
           headers: {

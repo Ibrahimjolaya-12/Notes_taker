@@ -6,6 +6,8 @@ import { SearchOutlined, CloseOutlined } from "@ant-design/icons";
 
 const { useBreakpoint } = Grid;
 
+const BACKEND_URL = "https://class-notes-backend.vercel.app";
+
 const SearchBtn = ({ setTodos }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchText, setSearchText] = useState("");
@@ -43,7 +45,7 @@ const SearchBtn = ({ setTodos }) => {
       }
 
       const res = await axios.get(
-        `http://localhost:5000/api/todos/getAllTodos?search=${encodeURIComponent(text)}`,
+        `${BACKEND_URL}/api/todos/getAllTodos?search=${encodeURIComponent(text)}`,
         {
           headers: { Authorization: `Bearer ${token}` },
         }
