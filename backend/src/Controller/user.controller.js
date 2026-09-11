@@ -102,37 +102,39 @@ export const deleteSubject = async (req, res) => {
 };
 
 // 1. FORGOT PASSWORD (Link Generate & Send Email)
+// 1. FORGOT PASSWORD (Fixed Scope & Error Logging)
 export const forgotPassword = async (req, res) => {
+  let user; // 👈 Scope ko try ke bahar define kiya
   try {
     const { email } = req.body;
     if (!email) {
       return res.status(400).json({ success: false, message: "Email is required" });
     }
 
-    const user = await User.findOne({ email: email.toLowerCase().trim() });
+    user = await User.findOne({ email: email.toLowerCase().trim() });
     if (!user) {
-      // Security rule: Agar email nahi bhi milti, response generic rakho taake email leak na ho
       return res.status(404).json({ success: false, message: "No account found with this email" });
     }
 
     // 32-bytes ka raw unhashed crypto token generate kiya
     const resetToken = crypto.randomBytes(32).toString("hex");
 
-    // Token ko sha256 se hash karke database mein save karo (taake DB leak hone par bhi token safe rahe)
+    // Token ko sha256 se hash karke database mein save karo
     user.resetPasswordToken = crypto.createHash("sha256").update(resetToken).digest("hex");
-    
-    // Token 15 minutes ke liye valid hoga
-    user.resetPasswordExpire = Date.now() + 15 * 60 * 1000;
+    user.resetPasswordExpire = Date.now() + 15 * 60 * 1000; // 15 mins expiry
 
     await user.save({ validateBeforeSave: false });
 
-    // Frontend Reset Password Page ka URL
-const resetUrl = `${process.env.FRONTEND_URL || "http://localhost:5173"}/auth/reset-password/${resetToken}`;    // Nodemailer configuration
+    // Live URL fallback
+    const frontendUrl = process.env.FRONTEND_URL || "https://class-notes-sable.vercel.app";
+    const resetUrl = `${frontendUrl}/auth/reset-password/${resetToken}`;
+
+    // Nodemailer transport configuration
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS, // Gmail App Password (normal password nahi chalega)
+        pass: process.env.EMAIL_PASS, // Vercel env mein bina spaces ke hona chahiye
       },
     });
 
@@ -157,12 +159,15 @@ const resetUrl = `${process.env.FRONTEND_URL || "http://localhost:5173"}/auth/re
       message: "Password reset link sent to your email successfully.",
     });
   } catch (error) {
-    // Agar email send hone mein error aaye, toh DB fields clean karo
+    console.error("Actual Forgot Password / Nodemailer Error:", error.message);
+
+    // Ab 'user' yahan crash nahi karega
     if (user) {
       user.resetPasswordToken = undefined;
       user.resetPasswordExpire = undefined;
       await user.save({ validateBeforeSave: false });
     }
+
     return res.status(500).json({ success: false, message: error.message });
   }
 };
