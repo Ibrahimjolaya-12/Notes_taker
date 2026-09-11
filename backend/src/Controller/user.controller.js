@@ -3,14 +3,13 @@ import crypto from "crypto";
 import bcrypt from "bcrypt";
 import nodemailer from "nodemailer";
 import { User } from "../Models/Auth.model.js";
+
 // 1. Create Subject Folder
-// user.controller.js ke andar:
 export const createSubject = async (req, res) => {
   try {
     const { code, name } = req.body;
-
-    // 👈 'uid' add kar diya (jo tumhare token payload se match karta hai)
-    const userId = req.user?._id || req.user?.id || req.user?.userId || req.user?.uid;
+    const userId =
+      req.user?._id || req.user?.id || req.user?.userId || req.user?.uid;
 
     if (!userId) {
       return res.status(401).json({
@@ -29,10 +28,10 @@ export const createSubject = async (req, res) => {
     const newSubject = await Subject.create({
       code: code.trim().toUpperCase(),
       name: name.trim(),
-      user: userId, // 👈 Ab valid user ID pass hogi
+      user: userId,
     });
 
-    res.status(201).json({
+    return res.status(201).json({
       success: true,
       message: "Subject folder created successfully",
       subject: newSubject,
@@ -44,13 +43,15 @@ export const createSubject = async (req, res) => {
         message: "Subject code already exists in your shelf.",
       });
     }
-    res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 
+// 2. Get All User Subjects
 export const getMySubjects = async (req, res) => {
   try {
-    const userId = req.user?._id || req.user?.id || req.user?.userId || req.user?.uid;
+    const userId =
+      req.user?._id || req.user?.id || req.user?.userId || req.user?.uid;
 
     if (!userId) {
       return res.status(401).json({
@@ -59,82 +60,107 @@ export const getMySubjects = async (req, res) => {
       });
     }
 
-    const subjects = await Subject.find({ user: userId }).sort({ createdAt: -1 });
-    res.status(200).json({ success: true, subjects });
+    const subjects = await Subject.find({ user: userId }).sort({
+      createdAt: -1,
+    });
+    return res.status(200).json({ success: true, subjects });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 
-
+// 3. Get Single Subject
 export const getSingleSubject = async (req, res) => {
   try {
     const { id } = req.params;
-    const userId = req.user?._id || req.user?.id || req.user?.userId || req.user?.uid;
+    const userId =
+      req.user?._id || req.user?.id || req.user?.userId || req.user?.uid;
+
     if (!userId) {
-      return res.status(401).json({ success: false, message: "User authentication failed." });
+      return res
+        .status(401)
+        .json({ success: false, message: "User authentication failed." });
     }
 
     const subject = await Subject.findOne({ _id: id, user: userId });
     if (!subject) {
-      return res.status(404).json({ success: false, message: "Subject not found." });
+      return res
+        .status(404)
+        .json({ success: false, message: "Subject not found." });
     }
 
-    res.status(200).json({ success: true, subject });
+    return res.status(200).json({ success: true, subject });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 
-
+// 4. Delete Subject
 export const deleteSubject = async (req, res) => {
-  try{
+  try {
     const { id } = req.params;
-    const userId = req.user?._id || req.user?.id || req.user?.userId || req.user?.uid;
+    const userId =
+      req.user?._id || req.user?.id || req.user?.userId || req.user?.uid;
+
     const subject = await Subject.findOneAndDelete({ _id: id, user: userId });
     if (!subject) {
-      return res.status(404).json({ success: false, message: "Subject not found or you don't have permission to delete it." });
+      return res.status(404).json({
+        success: false,
+        message:
+          "Subject not found or you don't have permission to delete it.",
+      });
     }
-    res.status(200).json({ success: true, message: "Subject deleted successfully." });
+    return res
+      .status(200)
+      .json({ success: true, message: "Subject deleted successfully." });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 
-// 1. FORGOT PASSWORD (Link Generate & Send Email)
-// 1. FORGOT PASSWORD (Fixed Scope & Error Logging)
+// 5. Forgot Password (Link Generate & Send Email)
 export const forgotPassword = async (req, res) => {
-  let user; // 👈 Scope ko try ke bahar define kiya
+  let user; // Scope ko try ke bahar define kiya taake catch block crash na kare
   try {
     const { email } = req.body;
     if (!email) {
-      return res.status(400).json({ success: false, message: "Email is required" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Email is required" });
     }
 
     user = await User.findOne({ email: email.toLowerCase().trim() });
     if (!user) {
-      return res.status(404).json({ success: false, message: "No account found with this email" });
+      return res
+        .status(404)
+        .json({ success: false, message: "No account found with this email" });
     }
 
-    // 32-bytes ka raw unhashed crypto token generate kiya
+    // 32-bytes ka raw crypto token
     const resetToken = crypto.randomBytes(32).toString("hex");
 
-    // Token ko sha256 se hash karke database mein save karo
-    user.resetPasswordToken = crypto.createHash("sha256").update(resetToken).digest("hex");
-    user.resetPasswordExpire = Date.now() + 15 * 60 * 1000; // 15 mins expiry
+    // Token ko sha256 se hash karke database mein save kiya
+    user.resetPasswordToken = crypto
+      .createHash("sha256")
+      .update(resetToken)
+      .digest("hex");
+
+    // Token 15 minutes ke liye valid hoga
+    user.resetPasswordExpire = Date.now() + 15 * 60 * 1000;
 
     await user.save({ validateBeforeSave: false });
 
-    // Live URL fallback
-    const frontendUrl = process.env.FRONTEND_URL || "https://class-notes-sable.vercel.app";
+    // Live URL Fallback
+    const frontendUrl =
+      process.env.FRONTEND_URL || "https://class-notes-sable.vercel.app";
     const resetUrl = `${frontendUrl}/auth/reset-password/${resetToken}`;
 
-    // Nodemailer transport configuration
+    // Nodemailer transporter
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS, // Vercel env mein bina spaces ke hona chahiye
+        pass: process.env.EMAIL_PASS,
       },
     });
 
@@ -143,11 +169,13 @@ export const forgotPassword = async (req, res) => {
       to: user.email,
       subject: "Password Reset Request",
       html: `
-        <div style="font-family: Arial, sans-serif; padding: 20px; color: #333;">
-          <h2>Password Reset Request</h2>
-          <p>Aapne apna password reset karne ki request bheji thi. Neeche diye gaye button par click karke naya password set karein:</p>
-          <a href="${resetUrl}" style="background: #4f46e5; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">Reset Password</a>
-          <p style="margin-top: 20px; font-size: 12px; color: #666;">Yeh link sirf 15 minutes ke liye valid hai. Agar aapne yeh request nahi ki, toh is email ko ignore karein.</p>
+        <div style="font-family: Arial, sans-serif; padding: 20px; color: #333; line-height: 1.5;">
+          <h2 style="color: #4f46e5;">Password Reset Request</h2>
+          <p>Aapne ClassNotes account ka password reset karne ki request bheji thi. Naya password set karne ke liye neeche diye gaye button par click karein:</p>
+          <div style="margin: 25px 0;">
+            <a href="${resetUrl}" style="background: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">Reset Password</a>
+          </div>
+          <p style="font-size: 13px; color: #64748b;">Yeh link sirf 15 minutes ke liye valid hai. Agar aapne password reset request nahi ki thi, toh is email ko ignore karein.</p>
         </div>
       `,
     };
@@ -159,9 +187,9 @@ export const forgotPassword = async (req, res) => {
       message: "Password reset link sent to your email successfully.",
     });
   } catch (error) {
-    console.error("Actual Forgot Password / Nodemailer Error:", error.message);
+    console.error("Nodemailer / Forgot Password Failure:", error.message);
 
-    // Ab 'user' yahan crash nahi karega
+    // Agar email send hone mein error aaye toh clean up karo
     if (user) {
       user.resetPasswordToken = undefined;
       user.resetPasswordExpire = undefined;
@@ -172,20 +200,25 @@ export const forgotPassword = async (req, res) => {
   }
 };
 
-// 2. RESET PASSWORD (Verify Token & Update Password)
+// 6. Reset Password (Verify Token & Update Password)
 export const resetPassword = async (req, res) => {
   try {
-    const { token } = req.params; // URL se aane wala raw token
+    const { token } = req.params;
     const { newPassword } = req.body;
 
     if (!newPassword || newPassword.length < 6) {
-      return res.status(400).json({ success: false, message: "Password must be at least 6 characters long." });
+      return res.status(400).json({
+        success: false,
+        message: "Password must be at least 6 characters long.",
+      });
     }
 
-    // Aane wale raw token ko dobara sha256 se hash kiya taake DB wale hashed token se match ho
-    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+    // Aane wale raw token ko sha256 hash karo taake DB ke token se match ho sake
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(token)
+      .digest("hex");
 
-    // Check karo token match ho raha hai aur expire nahi hua ($gt: Date.now())
     const user = await User.findOne({
       resetPasswordToken: hashedToken,
       resetPasswordExpire: { $gt: Date.now() },
@@ -202,12 +235,12 @@ export const resetPassword = async (req, res) => {
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(newPassword, salt);
 
-    // Token fields ko saaf (destroy) karo taake link dobara use na ho sake
+    // Token cleanup
     user.resetPasswordToken = undefined;
     user.resetPasswordExpire = undefined;
 
-    // user.save() ki jagah validateModifiedOnly lagao:
-await user.save({ validateModifiedOnly: true });
+    // Sirf modified password fields validate hongi taake extra schema validation error na de
+    await user.save({ validateModifiedOnly: true });
 
     return res.status(200).json({
       success: true,
