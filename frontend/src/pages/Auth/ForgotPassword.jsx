@@ -88,7 +88,7 @@ const ForgotPassword = () => {
             Check your email
           </h4>
           <p style={{ color: "#94a3b8", fontSize: "13px", lineHeight: "1.6", margin: "0 0 24px" }}>
-            Humne <span style={{ color: "#818cf8", fontWeight: 600 }}>{sentEmail}</span> par password reset link bhej diya hai. Apna inbox aur Spam folder check karein.
+            We've <span style={{ color: "#818cf8", fontWeight: 600 }}>{sentEmail}</span> sent a password reset link. Check your inbox or spam folder.
           </p>
 
           <Link
