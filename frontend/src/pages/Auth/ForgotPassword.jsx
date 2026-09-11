@@ -7,8 +7,9 @@ import { Link } from "react-router-dom";
 const { Title } = Typography;
 const { useBreakpoint } = Grid;
 
-// Production mein vercel URL, local testing ke liye localhost:5000
-const BACKEND_URL = "http://localhost:5000";
+// Live Vercel Backend URL with Vite Env fallback
+const BACKEND_URL =
+  import.meta.env.VITE_BACKEND_URL || "https://class-notes-backend.vercel.app";
 
 const ForgotPassword = () => {
   const [loading, setLoading] = useState(false);
@@ -28,12 +29,17 @@ const ForgotPassword = () => {
       });
 
       if (res.data.success) {
-        message.success(res.data.message || "Reset link successfully send to you email!");
+        message.success(
+          res.data.message || "Reset link successfully sent to your email!"
+        );
         setSentEmail(cleanEmail);
         setEmailSent(true);
       }
     } catch (error) {
-      message.error(error.response?.data?.message || "Something wents wrong to send reset link.");
+      message.error(
+        error.response?.data?.message ||
+          "Something went wrong while sending the reset link."
+      );
     } finally {
       setLoading(false);
     }

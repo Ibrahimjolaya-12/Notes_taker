@@ -127,8 +127,7 @@ export const forgotPassword = async (req, res) => {
     await user.save({ validateBeforeSave: false });
 
     // Frontend Reset Password Page ka URL
-const resetUrl = `${process.env.FRONTEND_URL || "http://localhost:5173"}/auth/reset-password/${resetToken}`;
-    // Nodemailer configuration
+const resetUrl = `${process.env.FRONTEND_URL || "http://localhost:5173"}/auth/reset-password/${resetToken}`;    // Nodemailer configuration
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {

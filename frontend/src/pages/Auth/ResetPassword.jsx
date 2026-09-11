@@ -7,7 +7,9 @@ import { LockOutlined, ArrowLeftOutlined } from "@ant-design/icons";
 const { Title } = Typography;
 const { useBreakpoint } = Grid;
 
-const BACKEND_URL = "http://localhost:5000";
+// Live Vercel Backend URL with Vite Env fallback
+const BACKEND_URL =
+  import.meta.env.VITE_BACKEND_URL || "https://class-notes-backend.vercel.app";
 
 const ResetPassword = () => {
   const { token } = useParams();
@@ -34,7 +36,8 @@ const ResetPassword = () => {
     } catch (error) {
       console.error("Reset Error:", error);
       message.error(
-        error.response?.data?.message || "Link has been expired or invalid token."
+        error.response?.data?.message ||
+          "Link has expired or the token is invalid."
       );
     } finally {
       setLoading(false);
