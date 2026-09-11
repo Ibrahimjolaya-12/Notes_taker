@@ -2,7 +2,7 @@ import express from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { User } from "../Models/Auth.model.js";
-import { forgotPassword, resetPassword } from "../Controller/User.controller.js";
+import { forgotPassword, resetPassword } from "../Controller/user.controller.js";
 const router = express.Router();
 
 // REGISTER
