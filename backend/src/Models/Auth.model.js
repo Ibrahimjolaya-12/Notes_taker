@@ -18,17 +18,20 @@ const userSchema = new Schema(
       type: String,
       required: [true, "Password is required"],
     },
+    resetPasswordToken: {
+      type: String,
+    },
+    resetPasswordExpire: {
+      type: Date,
+    },
     semester: {
       type: String,
-      enum:{
-        values:[1,2,3,4,5,6,7,8],
-        message:"Semester must be required"
-      },
+      default: "Semester 1", // Default value taake khali hone par fail na ho
     },
   },
   {
-    timestamps: true, // 'timestamps' with 's'
-  }
+    timestamps: true,
+  },
 );
 
 export const User = model("User", userSchema);

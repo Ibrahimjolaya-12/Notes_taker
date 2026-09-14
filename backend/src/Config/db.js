@@ -7,7 +7,8 @@ if (!cached) {
 }
 
 const connectDB = async () => {
-  if (cached.conn) {
+  // 1. Check karo ke connection exist karta hai AUR socket active (connected) hai
+  if (cached.conn && mongoose.connection.readyState === 1) {
     return cached.conn;
   }
 
@@ -15,11 +16,12 @@ const connectDB = async () => {
   if (!uri) {
     throw new Error("MONGO_URI environment variable is missing!");
   }
-
+  console.log("Mongodb connected")
   if (!cached.promise) {
     const opts = {
-      bufferCommands: true, // Queries crash nahi hongi, queue mein wait karengi
-      serverSelectionTimeoutMS: 15000,
+      bufferCommands: false, // Serverless mein queries ko freeze karne ke bajaye fauran fail-fast karo
+      maxPoolSize: 10,       // Atlas connection limits ko exhaust hone se bachata hai
+      serverSelectionTimeoutMS: 10000,
     };
 
     cached.promise = mongoose.connect(uri, opts).then((mongooseInstance) => {
@@ -32,6 +34,7 @@ const connectDB = async () => {
     cached.conn = await cached.promise;
   } catch (error) {
     cached.promise = null;
+    cached.conn = null;
     console.error("MongoDB connection failed:", error.message);
     throw error;
   }
