@@ -9,16 +9,40 @@ import ResetPassword from "./ResetPassword";
 const Auth = () => {
   const location = useLocation();
 
-  // Agar URL mein forgot-password ya reset-password aaye toh true ho jayega
+  // Agar URL mein forgot-password ya reset-password ho toh tabs chupa do
   const hideAuthBar =
     location.pathname.includes("forgot-password") ||
     location.pathname.includes("reset-password");
 
   return (
-    <div className="auth-wrapper">
+    <div
+      className="auth-wrapper"
+      style={{
+        position: "relative",
+        minHeight: "100vh",
+        width: "100%",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "80px 20px 20px", // Top par 80px space taake top navbar ke niche na dabe
+        boxSizing: "border-box",
+      }}
+    >
+      {/* Top Navbar: Absolute at top */}
       <AuthNav />
-      <div className="auth-card">
-        {/* Jab hideAuthBar false hoga, sirf tabhi Authbar show hoga */}
+
+      {/* Main Single Centered Card */}
+      <div
+        className="auth-card"
+        style={{
+          width: "100%",
+          maxWidth: "440px",
+          margin: "0 auto",
+          zIndex: 2,
+        }}
+      >
+        {/* Sign In / Sign Up tabs */}
         {!hideAuthBar && <Authbar />}
 
         <Routes>

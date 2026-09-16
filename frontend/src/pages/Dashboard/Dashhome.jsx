@@ -1,9 +1,16 @@
 import { useEffect, useState } from "react";
-import { Col, Popconfirm, Row, Spin, message, Grid, Button } from "antd";
-import { PlusOutlined, BookOutlined, DeleteOutlined, ThunderboltOutlined, HolderOutlined } from "@ant-design/icons";
+import { Popconfirm, Spin, message, Grid, Button } from "antd";
+import {
+  PlusOutlined,
+  BookOutlined,
+  DeleteOutlined,
+  ThunderboltOutlined,
+  HolderOutlined,
+} from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import { useTheme } from "../../context/ThemeContext";
 
 const { useBreakpoint } = Grid;
 
@@ -13,6 +20,7 @@ const Dashhome = () => {
   const navigate = useNavigate();
   const [subjects, setSubjects] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { isDarkMode } = useTheme();
 
   const screens = useBreakpoint();
   const isMobile = !screens.sm;
@@ -28,7 +36,9 @@ const Dashhome = () => {
 
       if (res.data.success) {
         const fetchedSubjects = res.data.subjects;
-        const savedOrder = JSON.parse(localStorage.getItem("subjects_order") || "[]");
+        const savedOrder = JSON.parse(
+          localStorage.getItem("subjects_order") || "[]"
+        );
 
         if (savedOrder.length > 0) {
           const sorted = [...fetchedSubjects].sort((a, b) => {
@@ -64,22 +74,31 @@ const Dashhome = () => {
     items.splice(result.destination.index, 0, reorderedItem);
 
     setSubjects(items);
-    localStorage.setItem("subjects_order", JSON.stringify(items.map((s) => s._id)));
+    localStorage.setItem(
+      "subjects_order",
+      JSON.stringify(items.map((s) => s._id))
+    );
   };
 
   // 3. Delete Subject
   const handleDelete = async (subjectId) => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.delete(`${BACKEND_URL}/api/subjects/${subjectId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await axios.delete(
+        `${BACKEND_URL}/api/subjects/${subjectId}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
 
       if (res.data.success) {
         message.success(res.data.message || "Subject deleted successfully");
         setSubjects((prev) => {
           const filtered = prev.filter((sub) => sub._id !== subjectId);
-          localStorage.setItem("subjects_order", JSON.stringify(filtered.map((s) => s._id)));
+          localStorage.setItem(
+            "subjects_order",
+            JSON.stringify(filtered.map((s) => s._id))
+          );
           return filtered;
         });
       }
@@ -96,6 +115,7 @@ const Dashhome = () => {
         maxWidth: "1180px",
         margin: "0 auto",
         padding: isMobile ? "12px" : "24px 20px",
+        color: isDarkMode ? "#f8fafc" : "#0f172a",
       }}
     >
       {/* Top Header */}
@@ -112,15 +132,23 @@ const Dashhome = () => {
         <div>
           <h2
             style={{
-              color: "#ffffff",
+              color: isDarkMode ? "#ffffff" : "#0f172a",
               fontSize: isMobile ? "20px" : "24px",
               fontWeight: "700",
               margin: 0,
+              transition: "color 0.3s ease",
             }}
           >
             Your Subjects
           </h2>
-          <p style={{ color: "#94a3b8", fontSize: "13px", margin: "4px 0 0" }}>
+          <p
+            style={{
+              color: isDarkMode ? "#94a3b8" : "#64748b",
+              fontSize: "13px",
+              margin: "4px 0 0",
+              transition: "color 0.3s ease",
+            }}
+          >
             Drag and reposition cards freely across your study dashboard.
           </p>
         </div>
@@ -150,14 +178,18 @@ const Dashhome = () => {
         <div
           style={{
             width: "100%",
-            background: "#0d1026",
-            border: "1px solid rgba(255, 255, 255, 0.08)",
+            background: isDarkMode ? "#0d1026" : "#ffffff",
+            border: isDarkMode
+              ? "1px solid rgba(255, 255, 255, 0.08)"
+              : "1px solid #e2e8f0",
             borderRadius: "16px",
             padding: isMobile ? "45px 16px" : "70px 20px",
             textAlign: "center",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
+            boxShadow: isDarkMode ? "none" : "0 4px 20px rgba(0, 0, 0, 0.05)",
+            transition: "all 0.3s ease",
           }}
         >
           <div
@@ -165,22 +197,40 @@ const Dashhome = () => {
               width: "56px",
               height: "56px",
               borderRadius: "14px",
-              background: "rgba(99, 102, 241, 0.15)",
-              color: "#818cf8",
+              background: isDarkMode ? "rgba(99, 102, 241, 0.15)" : "#e0e7ff",
+              color: isDarkMode ? "#818cf8" : "#4f46e5",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               marginBottom: "18px",
-              border: "1px solid rgba(99, 102, 241, 0.25)",
+              border: isDarkMode
+                ? "1px solid rgba(99, 102, 241, 0.25)"
+                : "1px solid #c7d2fe",
             }}
           >
             <BookOutlined style={{ fontSize: "24px" }} />
           </div>
-          <h3 style={{ color: "#ffffff", fontSize: "18px", fontWeight: "700", marginBottom: "8px" }}>
+          <h3
+            style={{
+              color: isDarkMode ? "#ffffff" : "#0f172a",
+              fontSize: "18px",
+              fontWeight: "700",
+              marginBottom: "8px",
+            }}
+          >
             Your shelf is empty
           </h3>
-          <p style={{ color: "#94a3b8", fontSize: "13.5px", maxWidth: "440px", marginBottom: "20px", lineHeight: 1.5 }}>
-            Create your first subject folder to start organizing notes, interacting with AI, and preparing for exams.
+          <p
+            style={{
+              color: isDarkMode ? "#94a3b8" : "#64748b",
+              fontSize: "13.5px",
+              maxWidth: "440px",
+              marginBottom: "20px",
+              lineHeight: 1.5,
+            }}
+          >
+            Create your first subject folder to start organizing notes,
+            interacting with AI, and preparing for exams.
           </p>
           <Button
             type="primary"
@@ -198,39 +248,55 @@ const Dashhome = () => {
           </Button>
         </div>
       ) : (
-        /* Modern Physics-Based Drag Grid */
         <DragDropContext onDragEnd={handleOnDragEnd}>
-          <Droppable droppableId="subjects-board" direction={isMobile ? "vertical" : "horizontal"}>
+          <Droppable
+            droppableId="subjects-board"
+            direction={isMobile ? "vertical" : "horizontal"}
+          >
             {(provided) => (
               <div
                 {...provided.droppableProps}
                 ref={provided.innerRef}
                 style={{
-                  display: "flex",
-                  flexWrap: "wrap",
+                  display: "grid",
+                  gridTemplateColumns: isMobile
+                    ? "1fr"
+                    : "repeat(auto-fill, minmax(260px, 1fr))",
                   gap: "16px",
                   width: "100%",
+                  boxSizing: "border-box",
                 }}
               >
                 {subjects.map((item, index) => (
-                  <Draggable key={item._id} draggableId={item._id} index={index}>
+                  <Draggable
+                    key={item._id}
+                    draggableId={item._id}
+                    index={index}
+                  >
                     {(dragProvided, snapshot) => (
                       <div
                         ref={dragProvided.innerRef}
                         {...dragProvided.draggableProps}
                         style={{
-                          flex: isMobile ? "0 0 100%" : "0 0 calc(25% - 12px)",
-                          minWidth: isMobile ? "100%" : "250px",
+                          width: "100%",
                           boxSizing: "border-box",
                           ...dragProvided.draggableProps.style,
                         }}
                       >
                         <div
                           style={{
-                            background: snapshot.isDragging ? "#111432" : "#0c0d1e",
+                            background: snapshot.isDragging
+                              ? isDarkMode
+                                ? "#111432"
+                                : "#e0e7ff"
+                              : isDarkMode
+                              ? "#0c0d1e"
+                              : "#ffffff",
                             border: snapshot.isDragging
-                              ? "1px solid #6366f1"
-                              : "1px solid rgba(255, 255, 255, 0.08)",
+                              ? "1.5px solid #6366f1"
+                              : isDarkMode
+                              ? "1px solid rgba(255, 255, 255, 0.08)"
+                              : "1px solid #e2e8f0",
                             borderRadius: "14px",
                             padding: "18px",
                             display: "flex",
@@ -241,23 +307,31 @@ const Dashhome = () => {
                             boxSizing: "border-box",
                             boxShadow: snapshot.isDragging
                               ? "0 20px 40px rgba(99, 102, 241, 0.35), 0 0 15px rgba(99, 102, 241, 0.2)"
+                              : isDarkMode
+                              ? "none"
+                              : "0 2px 10px rgba(0, 0, 0, 0.04)",
+                            transform: snapshot.isDragging
+                              ? "scale(1.03)"
                               : "none",
-                            transform: snapshot.isDragging ? "scale(1.03)" : "none",
                             transition: snapshot.isDragging
                               ? "box-shadow 0.2s ease, border-color 0.2s ease"
-                              : "transform 0.2s ease, background 0.2s ease",
+                              : "transform 0.2s ease, background 0.3s ease, border-color 0.3s ease",
                             position: "relative",
                             userSelect: "none",
                           }}
                         >
-                          {/* Drag Handle Top Grip */}
+                          {/* Drag Handle Grip */}
                           <div
                             {...dragProvided.dragHandleProps}
                             style={{
                               position: "absolute",
                               top: "14px",
                               right: "14px",
-                              color: snapshot.isDragging ? "#818cf8" : "#475569",
+                              color: snapshot.isDragging
+                                ? "#6366f1"
+                                : isDarkMode
+                                ? "#475569"
+                                : "#94a3b8",
                               fontSize: "15px",
                               cursor: "grab",
                               padding: "4px",
@@ -276,7 +350,8 @@ const Dashhome = () => {
                               style={{
                                 width: "40px",
                                 height: "40px",
-                                background: "linear-gradient(135deg, #6366f1, #4338ca)",
+                                background:
+                                  "linear-gradient(135deg, #6366f1, #4338ca)",
                                 borderRadius: "10px",
                                 display: "flex",
                                 alignItems: "center",
@@ -284,7 +359,8 @@ const Dashhome = () => {
                                 color: "#ffffff",
                                 fontSize: "18px",
                                 marginBottom: "14px",
-                                boxShadow: "0 4px 12px rgba(99, 102, 241, 0.3)",
+                                boxShadow:
+                                  "0 4px 12px rgba(99, 102, 241, 0.3)",
                               }}
                             >
                               <BookOutlined />
@@ -292,7 +368,7 @@ const Dashhome = () => {
 
                             <span
                               style={{
-                                color: "#818cf8",
+                                color: isDarkMode ? "#818cf8" : "#4f46e5",
                                 fontSize: "11.5px",
                                 fontWeight: "600",
                                 letterSpacing: "0.5px",
@@ -306,12 +382,13 @@ const Dashhome = () => {
 
                             <h4
                               style={{
-                                color: "#ffffff",
+                                color: isDarkMode ? "#ffffff" : "#0f172a",
                                 fontSize: "15.5px",
                                 fontWeight: "600",
                                 margin: "0 0 12px 0",
                                 lineHeight: 1.4,
                                 wordBreak: "break-word",
+                                transition: "color 0.3s ease",
                               }}
                             >
                               {item.name}
@@ -324,7 +401,9 @@ const Dashhome = () => {
                               display: "flex",
                               alignItems: "center",
                               justifyContent: "space-between",
-                              borderTop: "1px solid rgba(255, 255, 255, 0.06)",
+                              borderTop: isDarkMode
+                                ? "1px solid rgba(255, 255, 255, 0.06)"
+                                : "1px solid #f1f5f9",
                               paddingTop: "12px",
                               marginTop: "6px",
                             }}
@@ -332,7 +411,7 @@ const Dashhome = () => {
                             <div
                               onClick={() => navigate(`/dashboard/${item._id}`)}
                               style={{
-                                color: "#818cf8",
+                                color: isDarkMode ? "#818cf8" : "#4f46e5",
                                 fontSize: "12px",
                                 fontWeight: "600",
                                 display: "flex",
@@ -353,9 +432,13 @@ const Dashhome = () => {
                               okButtonProps={{ danger: true }}
                               cancelButtonProps={{
                                 style: {
-                                  backgroundColor: "#1e1e38",
-                                  borderColor: "#35355e",
-                                  color: "#ffffff",
+                                  backgroundColor: isDarkMode
+                                    ? "#1e1e38"
+                                    : "#f1f5f9",
+                                  borderColor: isDarkMode
+                                    ? "#35355e"
+                                    : "#cbd5e1",
+                                  color: isDarkMode ? "#ffffff" : "#334155",
                                 },
                               }}
                             >
@@ -363,9 +446,13 @@ const Dashhome = () => {
                                 type="button"
                                 title="Delete Subject"
                                 style={{
-                                  background: "rgba(244, 63, 94, 0.12)",
-                                  border: "1px solid rgba(244, 63, 94, 0.25)",
-                                  color: "#f87171",
+                                  background: isDarkMode
+                                    ? "rgba(244, 63, 94, 0.12)"
+                                    : "#fee2e2",
+                                  border: isDarkMode
+                                    ? "1px solid rgba(244, 63, 94, 0.25)"
+                                    : "1px solid #fecaca",
+                                  color: isDarkMode ? "#f87171" : "#dc2626",
                                   width: "30px",
                                   height: "30px",
                                   borderRadius: "6px",
@@ -373,6 +460,7 @@ const Dashhome = () => {
                                   alignItems: "center",
                                   justifyContent: "center",
                                   cursor: "pointer",
+                                  transition: "all 0.2s ease",
                                 }}
                               >
                                 <DeleteOutlined style={{ fontSize: "13px" }} />

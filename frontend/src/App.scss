@@ -19,47 +19,73 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Outfit:wght@100..900&display=swap');
 
+/* Theme CSS Variables */
+:root {
+  --app-bg: #f8fafc;
+  --app-card-bg: #ffffff;
+  --app-text-primary: #0f172a;
+  --app-text-secondary: #475569;
+  --app-border: #e2e8f0;
+  --autofill-bg: #ffffff;
+  --autofill-text: #0f172a;
+}
+
+html.dark,
+body.dark-theme {
+  --app-bg: #03030d;
+  --app-card-bg: #0c0d1e;
+  --app-text-primary: #f8fafc;
+  --app-text-secondary: #94a3b8;
+  --app-border: rgba(255, 255, 255, 0.08);
+  --autofill-bg: #0c0d1e;
+  --autofill-text: #ffffff;
+}
+
+/* Global Typography & Font Family (No hardcoded color here) */
 * {
   font-family: "Inter", sans-serif;
-  color: white;
+  box-sizing: border-box;
 }
 
-
-#roots{
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--app-bg) !important;
+  color: var(--app-text-primary) !important;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  overflow-x: hidden;
 }
 
-main{
-    flex: 1 0 auto;
+#root,
+#roots {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
-
-button{
-  transition: 0.5s ease-in-out;
-}
-button:hover{
-transform: translateY(-5px);
+main {
+  flex: 1 0 auto;
 }
 
+/* Specific Interactive Transitions (Dropdowns aur internal buttons safe rahenge) */
+.btn,
+.ant-btn-primary {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 
-Button{
-  transition: 0.5s ease-in-out;
-}
-Button:hover{
-transform: translateY(-5px);
-}
-
-.Tag{
-  transition: 0.5s ease-in-out;
-}
-.Tag:hover{
-  transform: translateY(-5px);
-  font-size: 12px;
+  &:hover {
+    transform: translateY(-2px);
+  }
 }
 
+.Tag {
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
 
+  &:hover {
+    transform: translateY(-2px);
+    font-size: 12px;
+  }
+}
 
 /* Ant Design Message Icons Fix */
 .ant-message-notice-content .anticon {
@@ -69,25 +95,19 @@ transform: translateY(-5px);
   vertical-align: middle !important;
 }
 
-/* Success Icon Green */
 .ant-message-custom-content.ant-message-success .anticon {
-  color: #52c41a !important;
+  color: #10b981 !important;
 }
 
-/* Error Icon Red */
 .ant-message-custom-content.ant-message-error .anticon {
-  color: #ff4d4f !important;
+  color: #ef4444 !important;
 }
 
-/* Warning Icon Yellow */
 .ant-message-custom-content.ant-message-warning .anticon {
-  color: #faad14 !important;
+  color: #f59e0b !important;
 }
 
-
-
-
-/* 🛠️ Browser Autofill Dark Mode Fix */
+/* Dynamic Browser Autofill Fix (Adapts smoothly to theme) */
 input:-webkit-autofill,
 input:-webkit-autofill:hover, 
 input:-webkit-autofill:focus, 
@@ -104,14 +124,29 @@ select:-webkit-autofill:active,
 .ant-input:-webkit-autofill:hover,
 .ant-input:-webkit-autofill:focus,
 .ant-input:-webkit-autofill:active {
-  -webkit-text-fill-color: #ffffff !important;
-  caret-color: #ffffff !important;
-  -webkit-box-shadow: 0 0 0px 1000px #0c0d1e inset !important;
-  box-shadow: 0 0 0px 1000px #0c0d1e inset !important;
+  -webkit-text-fill-color: var(--autofill-text) !important;
+  caret-color: var(--autofill-text) !important;
+  -webkit-box-shadow: 0 0 0px 1000px var(--autofill-bg) inset !important;
+  box-shadow: 0 0 0px 1000px var(--autofill-bg) inset !important;
   transition: background-color 5000s ease-in-out 0s;
 }
 
-/* Chrome focus outline reset */
 input:-webkit-autofill:focus {
   border-color: #6366f1 !important;
+}
+
+/* Ant Layouts & Card Synchronizations */
+.ant-layout,
+.dashbar-layout,
+.dashbar-content {
+  background-color: var(--app-bg) !important;
+  transition: background-color 0.3s ease;
+}
+
+.subject-card, 
+.ant-card {
+  background-color: var(--app-card-bg) !important;
+  color: var(--app-text-primary) !important;
+  border-color: var(--app-border) !important;
+  transition: all 0.3s ease;
 }

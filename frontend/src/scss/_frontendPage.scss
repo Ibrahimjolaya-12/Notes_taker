@@ -1,10 +1,74 @@
+// .frontend-wrapper {
+//   position: relative; // 👈 Top-left logo position ke liye zaroori
+//   min-height: 100vh;
+//   width: 100%;
+//   display: flex;
+//   flex-direction: column;
+//   align-items: center;
+//   background: radial-gradient(circle at center, #0f0c29 0%, #08071a 50%, #030209 100%);
+//   // padding: 1.5rem;
+// }
+
+
+
+
+// .frontend-wrapper {
+//   position: relative;
+//   min-height: 100vh;
+//   width: 100%;
+//   display: flex;
+//   flex-direction: column;
+//   align-items: center;
+//   background: radial-gradient(circle at center, #0f0c29 0%, #08071a 50%, #030209 100%);
+//   transition: background 0.3s ease;
+// }
+
+// body.light-theme .frontend-wrapper {
+//   background: radial-gradient(circle at center, #f8fafc 0%, #e2e8f0 100%);
+// }
+
+// .feature-card {
+//   &:hover {
+//     border-color: rgba(99, 102, 241, 0.45) !important;
+//     transform: translateY(-3px);
+//     box-shadow: 0 10px 30px -10px rgba(99, 102, 241, 0.25) !important;
+//   }
+// }
+
+
+
 .frontend-wrapper {
-  position: relative; // 👈 Top-left logo position ke liye zaroori
+  position: relative;
   min-height: 100vh;
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   background: radial-gradient(circle at center, #0f0c29 0%, #08071a 50%, #030209 100%);
-  // padding: 1.5rem;
+  transition: background 0.3s ease;
+  overflow-x: hidden;
+}
+
+body.light-theme .frontend-wrapper {
+  background: radial-gradient(circle at center, #f8fafc 0%, #e2e8f0 100%);
+}
+
+.features-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.feature-card {
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+
+  &:hover {
+    border-color: rgba(99, 102, 241, 0.45) !important;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px -10px rgba(99, 102, 241, 0.25) !important;
+  }
+}
+
+.front-footer {
+  width: 100%;
 }

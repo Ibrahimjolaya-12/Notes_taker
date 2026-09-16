@@ -1101,9 +1101,8 @@
 
 
 
-
 import { useState, useEffect } from "react";
-import { Modal, Button, ConfigProvider, message, Grid, Tag } from "antd";
+import { Modal, Button, message, Grid, Tag } from "antd";
 import {
   CloseOutlined,
   FilePdfOutlined,
@@ -1113,12 +1112,14 @@ import {
   GlobalOutlined,
   FileWordOutlined,
 } from "@ant-design/icons";
+import { useTheme } from "../../context/ThemeContext";
 
 const { useBreakpoint } = Grid;
 
 const PreviewModal = ({ visible, onClose, note }) => {
   const screens = useBreakpoint();
   const isMobile = !screens.sm;
+  const { isDarkMode } = useTheme();
 
   // Progressive dynamic page loading states
   const [pages, setPages] = useState([1]);
@@ -1154,7 +1155,6 @@ const PreviewModal = ({ visible, onClose, note }) => {
     return url;
   };
 
-  // Jab current page successfully render ho jaye, tabhi agla page queue mein aayega
   const handlePageLoad = (loadedPage) => {
     if (hasMore && rawUrl.includes("cloudinary.com") && isPdf) {
       setPages((prev) => {
@@ -1167,7 +1167,6 @@ const PreviewModal = ({ visible, onClose, note }) => {
     }
   };
 
-  // Jaise hi agla page na miley (Cloudinary 404), auto-loading permanently stop ho jayegi
   const handlePageError = (failedPage) => {
     setHasMore(false);
     setPages((prev) => prev.filter((p) => p < failedPage));
@@ -1183,7 +1182,6 @@ const PreviewModal = ({ visible, onClose, note }) => {
     return `${note.title || "document"}.pdf`;
   };
 
-  // 1. OPEN BUTTON: Direct viewer tab me khulega
   const handleOpenExternal = () => {
     if (!rawUrl) return;
 
@@ -1199,7 +1197,6 @@ const PreviewModal = ({ visible, onClose, note }) => {
     window.open(rawUrl, "_blank", "noopener,noreferrer");
   };
 
-  // 2. SAVE BUTTON: Direct hard drive download
   const handleDownload = () => {
     if (!rawUrl) return;
 
@@ -1233,29 +1230,20 @@ const PreviewModal = ({ visible, onClose, note }) => {
   };
 
   return (
-    <ConfigProvider
-      theme={{
-        token: {
-          colorBgElevated: "#080816",
-          colorText: "#ffffff",
-          colorBorder: "#191b36",
-          colorPrimary: "#6366f1",
-        },
-      }}
-    >
+    <>
       <style>{`
         .custom-doc-scrollbar {
           overflow-y: auto !important;
           overflow-x: hidden !important;
           display: block !important;
           scrollbar-width: thin;
-          scrollbar-color: #6366f1 #0a0b16;
+          scrollbar-color: #6366f1 ${isDarkMode ? "#0a0b16" : "#f1f5f9"};
         }
         .custom-doc-scrollbar::-webkit-scrollbar {
           width: 8px;
         }
         .custom-doc-scrollbar::-webkit-scrollbar-track {
-          background: #0a0b16;
+          background: ${isDarkMode ? "#0a0b16" : "#f1f5f9"};
         }
         .custom-doc-scrollbar::-webkit-scrollbar-thumb {
           background: #6366f1;
@@ -1273,17 +1261,19 @@ const PreviewModal = ({ visible, onClose, note }) => {
         closable={false}
         centered
         width={isMobile ? "98%" : 940}
+        destroyOnClose
         styles={{
           mask: {
             backdropFilter: "blur(10px)",
-            backgroundColor: "rgba(2, 6, 23, 0.88)",
+            backgroundColor: isDarkMode ? "rgba(2, 6, 23, 0.88)" : "rgba(15, 23, 42, 0.5)",
           },
           content: {
-            backgroundColor: "#080816",
-            border: "1px solid rgba(255, 255, 255, 0.08)",
+            backgroundColor: isDarkMode ? "#080816" : "#ffffff",
+            border: isDarkMode ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0",
             padding: isMobile ? "14px 10px" : "18px 22px",
             borderRadius: "18px",
-            boxShadow: "0 25px 60px rgba(0,0,0,0.9)",
+            boxShadow: isDarkMode ? "0 25px 60px rgba(0,0,0,0.9)" : "0 15px 40px rgba(0,0,0,0.1)",
+            transition: "all 0.3s ease",
           },
         }}
       >
@@ -1294,7 +1284,7 @@ const PreviewModal = ({ visible, onClose, note }) => {
               display: "flex",
               justifyContent: "space-between",
               alignItems: "flex-start",
-              borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
+              borderBottom: isDarkMode ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0",
               paddingBottom: "12px",
               marginBottom: "12px",
               gap: "10px",
@@ -1305,7 +1295,7 @@ const PreviewModal = ({ visible, onClose, note }) => {
                 <h3
                   style={{
                     margin: 0,
-                    color: "#f8fafc",
+                    color: isDarkMode ? "#f8fafc" : "#0f172a",
                     fontSize: isMobile ? "16px" : "18px",
                     fontWeight: 700,
                     whiteSpace: "nowrap",
@@ -1321,7 +1311,7 @@ const PreviewModal = ({ visible, onClose, note }) => {
                   </Tag>
                 )}
               </div>
-              <p style={{ margin: "4px 0 0", color: "#818cf8", fontSize: "12px", fontWeight: 500 }}>
+              <p style={{ margin: "4px 0 0", color: isDarkMode ? "#818cf8" : "#4f46e5", fontSize: "12px", fontWeight: 500 }}>
                 {note.content || "Class Notes Interactive Workspace"}
               </p>
             </div>
@@ -1330,7 +1320,7 @@ const PreviewModal = ({ visible, onClose, note }) => {
               type="text"
               icon={<CloseOutlined />}
               onClick={onClose}
-              style={{ color: "#94a3b8", padding: 0, fontSize: "16px" }}
+              style={{ color: isDarkMode ? "#94a3b8" : "#64748b", padding: 0, fontSize: "16px" }}
             />
           </div>
 
@@ -1342,8 +1332,8 @@ const PreviewModal = ({ visible, onClose, note }) => {
               justifyContent: "space-between",
               alignItems: isMobile ? "stretch" : "center",
               gap: "10px",
-              background: "#0d0f22",
-              border: "1px solid rgba(255, 255, 255, 0.06)",
+              background: isDarkMode ? "#0d0f22" : "#f8fafc",
+              border: isDarkMode ? "1px solid rgba(255, 255, 255, 0.06)" : "1px solid #e2e8f0",
               borderRadius: "12px",
               padding: "10px 14px",
               marginBottom: "14px",
@@ -1355,14 +1345,20 @@ const PreviewModal = ({ visible, onClose, note }) => {
                   width: "36px",
                   height: "36px",
                   borderRadius: "9px",
-                  background: isPdf ? "rgba(99, 102, 241, 0.18)" : "rgba(239, 68, 68, 0.18)",
-                  color: isPdf ? "#818cf8" : "#ef4444",
+                  background: isPdf
+                    ? isDarkMode ? "rgba(99, 102, 241, 0.18)" : "#e0e7ff"
+                    : isDarkMode ? "rgba(239, 68, 68, 0.18)" : "#fee2e2",
+                  color: isPdf
+                    ? isDarkMode ? "#818cf8" : "#4f46e5"
+                    : isDarkMode ? "#ef4444" : "#dc2626",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   fontSize: "18px",
                   flexShrink: 0,
-                  border: isPdf ? "1px solid rgba(99, 102, 241, 0.3)" : "1px solid rgba(239, 68, 68, 0.3)",
+                  border: isPdf
+                    ? isDarkMode ? "1px solid rgba(99, 102, 241, 0.3)" : "1px solid #c7d2fe"
+                    : isDarkMode ? "1px solid rgba(239, 68, 68, 0.3)" : "1px solid #fecaca",
                 }}
               >
                 {isImage ? <FileTextOutlined /> : <FilePdfOutlined />}
@@ -1370,7 +1366,7 @@ const PreviewModal = ({ visible, onClose, note }) => {
               <div style={{ minWidth: 0 }}>
                 <span
                   style={{
-                    color: "#ffffff",
+                    color: isDarkMode ? "#ffffff" : "#0f172a",
                     fontSize: "13px",
                     fontWeight: 600,
                     display: "block",
@@ -1382,12 +1378,12 @@ const PreviewModal = ({ visible, onClose, note }) => {
                   {getFileName()}
                 </span>
                 <div style={{ display: "flex", gap: "6px", alignItems: "center", marginTop: "2px" }}>
-                  <span style={{ color: "#64748b", fontSize: "11px", display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                    <FileWordOutlined style={{ color: "#38bdf8" }} /> MS Word Doc
+                  <span style={{ color: isDarkMode ? "#64748b" : "#475569", fontSize: "11px", display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                    <FileWordOutlined style={{ color: "#0284c7" }} /> MS Word Doc
                   </span>
-                  <span style={{ color: "#475569" }}>•</span>
-                  <span style={{ color: "#64748b", fontSize: "11px", display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                    <GlobalOutlined style={{ color: "#4ade80" }} /> Chrome PDF Viewer
+                  <span style={{ color: isDarkMode ? "#475569" : "#cbd5e1" }}>•</span>
+                  <span style={{ color: isDarkMode ? "#64748b" : "#475569", fontSize: "11px", display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                    <GlobalOutlined style={{ color: "#16a34a" }} /> Chrome PDF Viewer
                   </span>
                 </div>
               </div>
@@ -1399,9 +1395,9 @@ const PreviewModal = ({ visible, onClose, note }) => {
                 icon={<ExportOutlined />}
                 onClick={handleOpenExternal}
                 style={{
-                  background: "rgba(255, 255, 255, 0.05)",
-                  borderColor: "rgba(255, 255, 255, 0.12)",
-                  color: "#cbd5e1",
+                  background: isDarkMode ? "rgba(255, 255, 255, 0.05)" : "#ffffff",
+                  borderColor: isDarkMode ? "rgba(255, 255, 255, 0.12)" : "#cbd5e1",
+                  color: isDarkMode ? "#cbd5e1" : "#334155",
                   height: "34px",
                   borderRadius: "7px",
                   fontWeight: 500,
@@ -1432,8 +1428,8 @@ const PreviewModal = ({ visible, onClose, note }) => {
             className="custom-doc-scrollbar"
             style={{
               height: isMobile ? "68vh" : "74vh",
-              background: "#0a0b16",
-              border: "1px solid rgba(255, 255, 255, 0.08)",
+              background: isDarkMode ? "#0a0b16" : "#f1f5f9",
+              border: isDarkMode ? "1px solid rgba(255, 255, 255, 0.08)" : "1px solid #e2e8f0",
               borderRadius: "14px",
               padding: isMobile ? "12px 6px" : "20px 14px",
             }}
@@ -1455,7 +1451,7 @@ const PreviewModal = ({ visible, onClose, note }) => {
                       height: "auto",
                       display: "block",
                       borderRadius: "6px",
-                      boxShadow: "0 10px 30px rgba(0,0,0,0.7)",
+                      boxShadow: isDarkMode ? "0 10px 30px rgba(0,0,0,0.7)" : "0 10px 25px rgba(0,0,0,0.1)",
                     }}
                   />
                 </div>
@@ -1466,7 +1462,7 @@ const PreviewModal = ({ visible, onClose, note }) => {
                       <div
                         style={{
                           background: "#ffffff",
-                          boxShadow: "0 10px 30px rgba(0,0,0,0.8)",
+                          boxShadow: isDarkMode ? "0 10px 30px rgba(0,0,0,0.8)" : "0 8px 20px rgba(0,0,0,0.12)",
                           borderRadius: "4px",
                           overflow: "hidden",
                         }}
@@ -1486,7 +1482,7 @@ const PreviewModal = ({ visible, onClose, note }) => {
                       <div
                         style={{
                           textAlign: "center",
-                          color: "#64748b",
+                          color: isDarkMode ? "#64748b" : "#475569",
                           fontSize: "11px",
                           marginTop: "6px",
                           fontWeight: 500,
@@ -1499,7 +1495,7 @@ const PreviewModal = ({ visible, onClose, note }) => {
                 </div>
               )
             ) : (
-              <div style={{ textAlign: "center", color: "#64748b", padding: "40px" }}>
+              <div style={{ textAlign: "center", color: isDarkMode ? "#64748b" : "#94a3b8", padding: "40px" }}>
                 <FileTextOutlined style={{ fontSize: "36px", marginBottom: "8px" }} />
                 <p style={{ margin: 0, fontSize: "14px" }}>No document attached to this note.</p>
               </div>
@@ -1507,7 +1503,7 @@ const PreviewModal = ({ visible, onClose, note }) => {
           </div>
         </div>
       </Modal>
-    </ConfigProvider>
+    </>
   );
 };
 

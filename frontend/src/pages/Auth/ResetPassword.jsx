@@ -1,8 +1,183 @@
+// import React, { useState } from "react";
+// import { useParams, useNavigate, Link } from "react-router-dom";
+// import axios from "axios";
+// import { Form, Input, Button, message, Typography, Row, Col, Grid } from "antd";
+// import { LockOutlined, ArrowLeftOutlined } from "@ant-design/icons";
+
+// const { Title } = Typography;
+// const { useBreakpoint } = Grid;
+
+// // Live Vercel Backend URL with Vite Env fallback
+// const BACKEND_URL =
+//   import.meta.env.VITE_BACKEND_URL || "https://class-notes-backend.vercel.app";
+
+// const ResetPassword = () => {
+//   const { token } = useParams();
+//   const navigate = useNavigate();
+//   const [loading, setLoading] = useState(false);
+//   const [form] = Form.useForm();
+
+//   const screens = useBreakpoint();
+//   const isMobile = !screens.sm;
+
+//   const onFinish = async (values) => {
+//     setLoading(true);
+//     try {
+//       const res = await axios.post(
+//         `${BACKEND_URL}/api/auth/reset-password/${token}`,
+//         { newPassword: values.password }
+//       );
+
+//       if (res.data.success) {
+//         message.success(res.data.message || "Password successfully updated!");
+//         form.resetFields();
+//         navigate("/auth/login");
+//       }
+//     } catch (error) {
+//       console.error("Reset Error:", error);
+//       message.error(
+//         error.response?.data?.message ||
+//           "Link has expired or the token is invalid."
+//       );
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   return (
+//     <>
+//       <style>{`
+//         input:-webkit-autofill,
+//         input:-webkit-autofill:hover, 
+//         input:-webkit-autofill:focus, 
+//         input:-webkit-autofill:active {
+//           -webkit-box-shadow: 0 0 0 1000px #060713 inset !important;
+//           -webkit-text-fill-color: #ffffff !important;
+//           transition: background-color 5000s ease-in-out 0s;
+//           caret-color: #ffffff;
+//         }
+//       `}</style>
+
+//       <Title level={3} className="auth-title" style={{ margin: "0 0 4px", color: "#f8fafc" }}>
+//         Reset Password
+//       </Title>
+//       <p className="auth-subtitle" style={{ color: "#94a3b8", marginBottom: "24px" }}>
+//         Enter and confirm your new account password
+//       </p>
+
+//       <Form layout="vertical" form={form} onFinish={onFinish}>
+//         <Row gutter={[0, 4]}>
+//           <Col span={24}>
+//             <Form.Item
+//               label={<span style={{ color: "#cbd5e1" }}>New Password</span>}
+//               name="password"
+//               rules={[
+//                 { required: true, message: "Please enter your new password!" },
+//                 { min: 6, message: "Password must be at least 6 characters!" },
+//               ]}
+//               hasFeedback
+//             >
+//               <Input.Password
+//                 prefix={<LockOutlined style={{ color: "#64748b" }} />}
+//                 placeholder="••••••••"
+//                 size="large"
+//                 style={{
+//                   backgroundColor: "#060713",
+//                   borderColor: "rgba(255, 255, 255, 0.12)",
+//                   color: "#ffffff",
+//                   borderRadius: "8px",
+//                 }}
+//               />
+//             </Form.Item>
+//           </Col>
+
+//           <Col span={24}>
+//             <Form.Item
+//               label={<span style={{ color: "#cbd5e1" }}>Confirm Password</span>}
+//               name="confirmPassword"
+//               dependencies={["password"]}
+//               hasFeedback
+//               rules={[
+//                 { required: true, message: "Please confirm your password!" },
+//                 ({ getFieldValue }) => ({
+//                   validator(_, value) {
+//                     if (!value || getFieldValue("password") === value) {
+//                       return Promise.resolve();
+//                     }
+//                     return Promise.reject(new Error("Passwords do not match!"));
+//                   },
+//                 }),
+//               ]}
+//               style={{ marginBottom: "16px" }}
+//             >
+//               <Input.Password
+//                 prefix={<LockOutlined style={{ color: "#64748b" }} />}
+//                 placeholder="••••••••"
+//                 size="large"
+//                 style={{
+//                   backgroundColor: "#060713",
+//                   borderColor: "rgba(255, 255, 255, 0.12)",
+//                   color: "#ffffff",
+//                   borderRadius: "8px",
+//                 }}
+//               />
+//             </Form.Item>
+//           </Col>
+
+//           <Col span={24}>
+//             <Button
+//               type="primary"
+//               htmlType="submit"
+//               block
+//               size="large"
+//               loading={loading}
+//               style={{
+//                 background: "#6366f1",
+//                 borderColor: "#6366f1",
+//                 height: isMobile ? "42px" : "46px",
+//                 fontWeight: 600,
+//                 borderRadius: "8px",
+//               }}
+//             >
+//               Update Password
+//             </Button>
+//           </Col>
+
+//           <Col span={24} style={{ textAlign: "center", marginTop: "20px" }}>
+//             <Link
+//               to="/auth/login"
+//               style={{
+//                 color: "#94a3b8",
+//                 fontSize: "13px",
+//                 fontWeight: 500,
+//                 textDecoration: "none",
+//                 display: "inline-flex",
+//                 alignItems: "center",
+//                 gap: "6px",
+//               }}
+//               onMouseEnter={(e) => (e.currentTarget.style.color = "#ffffff")}
+//               onMouseLeave={(e) => (e.currentTarget.style.color = "#94a3b8")}
+//             >
+//               <ArrowLeftOutlined /> Back to Sign In
+//             </Link>
+//           </Col>
+//         </Row>
+//       </Form>
+//     </>
+//   );
+// };
+
+// export default ResetPassword;
+
+
+
+
 import React, { useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import { Form, Input, Button, message, Typography, Row, Col, Grid } from "antd";
 import { LockOutlined, ArrowLeftOutlined } from "@ant-design/icons";
+import { useTheme } from "../../context/ThemeContext";
 
 const { Title } = Typography;
 const { useBreakpoint } = Grid;
@@ -16,6 +191,7 @@ const ResetPassword = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
+  const { isDarkMode } = useTheme();
 
   const screens = useBreakpoint();
   const isMobile = !screens.sm;
@@ -44,6 +220,14 @@ const ResetPassword = () => {
     }
   };
 
+  const dynamicInputStyle = {
+    backgroundColor: isDarkMode ? "#060713" : "#ffffff",
+    borderColor: isDarkMode ? "rgba(255, 255, 255, 0.12)" : "#cbd5e1",
+    color: isDarkMode ? "#ffffff" : "#0f172a",
+    borderRadius: "8px",
+    transition: "all 0.3s ease",
+  };
+
   return (
     <>
       <style>{`
@@ -51,17 +235,32 @@ const ResetPassword = () => {
         input:-webkit-autofill:hover, 
         input:-webkit-autofill:focus, 
         input:-webkit-autofill:active {
-          -webkit-box-shadow: 0 0 0 1000px #060713 inset !important;
-          -webkit-text-fill-color: #ffffff !important;
+          -webkit-box-shadow: 0 0 0 1000px ${isDarkMode ? "#060713" : "#ffffff"} inset !important;
+          -webkit-text-fill-color: ${isDarkMode ? "#ffffff" : "#0f172a"} !important;
           transition: background-color 5000s ease-in-out 0s;
-          caret-color: #ffffff;
+          caret-color: ${isDarkMode ? "#ffffff" : "#0f172a"};
         }
       `}</style>
 
-      <Title level={3} className="auth-title" style={{ margin: "0 0 4px", color: "#f8fafc" }}>
+      <Title
+        level={3}
+        className="auth-title"
+        style={{
+          margin: "0 0 4px",
+          color: isDarkMode ? "#f8fafc" : "#0f172a",
+          transition: "color 0.3s ease",
+        }}
+      >
         Reset Password
       </Title>
-      <p className="auth-subtitle" style={{ color: "#94a3b8", marginBottom: "24px" }}>
+      <p
+        className="auth-subtitle"
+        style={{
+          color: isDarkMode ? "#94a3b8" : "#64748b",
+          marginBottom: "24px",
+          transition: "color 0.3s ease",
+        }}
+      >
         Enter and confirm your new account password
       </p>
 
@@ -69,7 +268,16 @@ const ResetPassword = () => {
         <Row gutter={[0, 4]}>
           <Col span={24}>
             <Form.Item
-              label={<span style={{ color: "#cbd5e1" }}>New Password</span>}
+              label={
+                <span
+                  style={{
+                    color: isDarkMode ? "#cbd5e1" : "#334155",
+                    fontWeight: 500,
+                  }}
+                >
+                  New Password
+                </span>
+              }
               name="password"
               rules={[
                 { required: true, message: "Please enter your new password!" },
@@ -78,22 +286,30 @@ const ResetPassword = () => {
               hasFeedback
             >
               <Input.Password
-                prefix={<LockOutlined style={{ color: "#64748b" }} />}
+                prefix={
+                  <LockOutlined
+                    style={{ color: isDarkMode ? "#64748b" : "#94a3b8" }}
+                  />
+                }
                 placeholder="••••••••"
                 size="large"
-                style={{
-                  backgroundColor: "#060713",
-                  borderColor: "rgba(255, 255, 255, 0.12)",
-                  color: "#ffffff",
-                  borderRadius: "8px",
-                }}
+                style={dynamicInputStyle}
               />
             </Form.Item>
           </Col>
 
           <Col span={24}>
             <Form.Item
-              label={<span style={{ color: "#cbd5e1" }}>Confirm Password</span>}
+              label={
+                <span
+                  style={{
+                    color: isDarkMode ? "#cbd5e1" : "#334155",
+                    fontWeight: 500,
+                  }}
+                >
+                  Confirm Password
+                </span>
+              }
               name="confirmPassword"
               dependencies={["password"]}
               hasFeedback
@@ -111,15 +327,14 @@ const ResetPassword = () => {
               style={{ marginBottom: "16px" }}
             >
               <Input.Password
-                prefix={<LockOutlined style={{ color: "#64748b" }} />}
+                prefix={
+                  <LockOutlined
+                    style={{ color: isDarkMode ? "#64748b" : "#94a3b8" }}
+                  />
+                }
                 placeholder="••••••••"
                 size="large"
-                style={{
-                  backgroundColor: "#060713",
-                  borderColor: "rgba(255, 255, 255, 0.12)",
-                  color: "#ffffff",
-                  borderRadius: "8px",
-                }}
+                style={dynamicInputStyle}
               />
             </Form.Item>
           </Col>
@@ -137,6 +352,7 @@ const ResetPassword = () => {
                 height: isMobile ? "42px" : "46px",
                 fontWeight: 600,
                 borderRadius: "8px",
+                boxShadow: "0 4px 14px rgba(99, 102, 241, 0.35)",
               }}
             >
               Update Password
@@ -147,16 +363,25 @@ const ResetPassword = () => {
             <Link
               to="/auth/login"
               style={{
-                color: "#94a3b8",
+                color: isDarkMode ? "#94a3b8" : "#64748b",
                 fontSize: "13px",
                 fontWeight: 500,
                 textDecoration: "none",
                 display: "inline-flex",
                 alignItems: "center",
                 gap: "6px",
+                transition: "color 0.2s ease",
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "#ffffff")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "#94a3b8")}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.color = isDarkMode
+                  ? "#ffffff"
+                  : "#0f172a")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.color = isDarkMode
+                  ? "#94a3b8"
+                  : "#64748b")
+              }
             >
               <ArrowLeftOutlined /> Back to Sign In
             </Link>

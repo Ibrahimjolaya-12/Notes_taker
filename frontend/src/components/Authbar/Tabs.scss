@@ -1,3 +1,52 @@
+// .auth-tabs {
+//   display: flex;
+//   justify-content: center;
+//   width: 100%;
+//   margin-bottom: 24px;
+
+//   &__nav {
+//     display: flex;
+//     width: 100%;
+//     background-color: #121124;
+//     border: 1px solid #232238;
+//     border-radius: 10px;
+//     padding: 4px;
+//     gap: 4px;
+//   }
+
+//   &__btn {
+//     flex: 1;
+//     display: inline-flex;
+//     align-items: center;
+//     justify-content: center;
+//     padding: 8px 0;
+//     border: none;
+//     background: transparent;
+//     color: #9494a8;
+//     font-size: 13px;
+//     font-weight: 500;
+//     text-decoration: none;
+//     border-radius: 7px;
+//     transition: all 0.2s ease;
+//     cursor: pointer;
+
+//     &:hover:not(&--active) {
+//       color: #ffffff;
+//     }
+
+//     &--active {
+//       background-color: #030209;
+//       color: #ffffff;
+//       font-weight: 600;
+//       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+//     }
+//   }
+// }
+
+
+
+
+
 .auth-tabs {
   display: flex;
   justify-content: center;
@@ -7,11 +56,13 @@
   &__nav {
     display: flex;
     width: 100%;
-    background-color: #121124;
-    border: 1px solid #232238;
+    /* Default dark mode fallback */
+    background-color: var(--app-card-bg, #121124);
+    border: 1px solid var(--app-border, #232238);
     border-radius: 10px;
     padding: 4px;
     gap: 4px;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
   }
 
   &__btn {
@@ -22,7 +73,7 @@
     padding: 8px 0;
     border: none;
     background: transparent;
-    color: #9494a8;
+    color: var(--app-text-secondary, #9494a8);
     font-size: 13px;
     font-weight: 500;
     text-decoration: none;
@@ -31,14 +82,60 @@
     cursor: pointer;
 
     &:hover:not(&--active) {
+      color: var(--app-text-primary, #ffffff);
+    }
+
+    &--active {
+      background-color: var(--app-bg, #030209);
+      color: var(--app-text-primary, #ffffff) !important;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+  }
+}
+
+/* Light Theme Overrides (Jab body par light-theme class ho) */
+body.light-theme .auth-tabs,
+html:not(.dark) .auth-tabs {
+  .auth-tabs__nav {
+    background-color: #f1f5f9;
+    border: 1px solid #e2e8f0;
+  }
+
+  .auth-tabs__btn {
+    color: #64748b;
+
+    &:hover:not(.auth-tabs__btn--active) {
+      color: #0f172a;
+    }
+
+    &--active {
+      background-color: #ffffff;
+      color: #0f172a !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+  }
+}
+
+/* Dark Theme Overrides (Jab body par dark-theme class ho) */
+body.dark-theme .auth-tabs,
+html.dark .auth-tabs {
+  .auth-tabs__nav {
+    background-color: #121124;
+    border: 1px solid #232238;
+  }
+
+  .auth-tabs__btn {
+    color: #9494a8;
+
+    &:hover:not(.auth-tabs__btn--active) {
       color: #ffffff;
     }
 
     &--active {
       background-color: #030209;
-      color: #ffffff;
-      font-weight: 600;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+      color: #ffffff !important;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
     }
   }
 }

@@ -1,13 +1,11 @@
-import Topbar from './Topbar'
-import BasicTabs from './BasicTabs' // 👈 Yahan se curly braces hata diye!
+import BasicTabs from "./BasicTabs";
 
 const Authbar = () => {
   return (
-    <>
-      <Topbar/>
-      <BasicTabs/>
-    </>  
-  )
-}
+    <div className="auth-bar-container" style={{ width: "100%", marginBottom: "16px" }}>
+      <BasicTabs />
+    </div>
+  );
+};
 
-export default Authbar
+export default Authbar;
