@@ -52,7 +52,7 @@ const ThemeToggle = ({ size = "middle", style = {} }) => {
         isDarkMode ? (
           <SunOutlined
             style={{
-              color: "#fbbf24",
+              color: "#ffdb9e",
               fontSize: "17px",
               transition: "transform 0.3s ease",
             }}

@@ -921,7 +921,7 @@ const Dashbar = () => {
               aria-label="Toggle Theme"
               icon={
                 isDarkMode ? (
-                  <SunOutlined style={{ color: "#f59e0b", fontSize: "17px" }} />
+                  <SunOutlined style={{ color: "#ffdb9e", fontSize: "17px" }} />
                 ) : (
                   <MoonOutlined style={{ color: "#4f46e5", fontSize: "17px" }} />
                 )

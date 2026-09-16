@@ -90,7 +90,7 @@ const AuthNav = () => {
         aria-label="Toggle Theme"
         icon={
           isDarkMode ? (
-            <SunOutlined style={{ color: "#f59e0b", fontSize: "16px" }} />
+            <SunOutlined style={{ color: "#ffdb9e", fontSize: "16px" }} />
           ) : (
             <MoonOutlined style={{ color: "#4f46e5", fontSize: "16px" }} />
           )

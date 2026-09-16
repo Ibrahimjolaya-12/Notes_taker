@@ -233,7 +233,7 @@ const Navbar = () => {
             aria-label="Toggle Theme"
             icon={
               isDarkMode ? (
-                <SunOutlined style={{ color: "#f59e0b", fontSize: "16px" }} />
+                <SunOutlined style={{ color: "#ffdb9e", fontSize: "16px" }} />
               ) : (
                 <MoonOutlined style={{ color: "#4fbf8b", fontSize: "16px" }} />
               )
@@ -325,7 +325,7 @@ const Navbar = () => {
                 icon={
                   isDarkMode ? (
                     <SunOutlined
-                      style={{ color: "#f59e0b", fontSize: "16px" }}
+                      style={{ color: "#ffdb9e", fontSize: "16px" }}
                     />
                   ) : (
                     <MoonOutlined
