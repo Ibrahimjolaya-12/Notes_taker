@@ -1098,14 +1098,26 @@ const ShowTodos = () => {
           fontWeight: 600,
           fontSize: "11px",
           backgroundColor: isCompleted
-            ? isDarkMode ? "rgba(16, 185, 129, 0.15)" : "#d1fae5"
-            : isDarkMode ? "rgba(244, 63, 94, 0.15)" : "#fee2e2",
+            ? isDarkMode
+              ? "rgba(16, 185, 129, 0.15)"
+              : "#d1fae5"
+            : isDarkMode
+            ? "rgba(244, 63, 94, 0.15)"
+            : "#fee2e2",
           color: isCompleted
-            ? isDarkMode ? "#34d399" : "#059669"
-            : isDarkMode ? "#fb7185" : "#e11d48",
+            ? isDarkMode
+              ? "#34d399"
+              : "#059669"
+            : isDarkMode
+            ? "#fb7185"
+            : "#e11d48",
           border: isCompleted
-            ? isDarkMode ? "1px solid rgba(16, 185, 129, 0.3)" : "1px solid #a7f3d0"
-            : isDarkMode ? "1px solid rgba(244, 63, 94, 0.3)" : "1px solid #fecaca",
+            ? isDarkMode
+              ? "1px solid rgba(16, 185, 129, 0.3)"
+              : "1px solid #a7f3d0"
+            : isDarkMode
+            ? "1px solid rgba(244, 63, 94, 0.3)"
+            : "1px solid #fecaca",
         }}
       >
         {status ? status.toUpperCase() : "INCOMPLETE"}
@@ -1272,13 +1284,21 @@ const ShowTodos = () => {
                     }}
                   >
                     <h4
+                      onClick={() => handleOpenViewModal(todo)}
                       style={{
                         margin: 0,
                         color: isDarkMode ? "#ffffff" : "#0f172a",
                         fontSize: "15px",
                         fontWeight: 600,
                         lineHeight: 1.4,
+                        cursor: "pointer",
+                        transition: "color 0.2s ease",
                       }}
+                      onMouseEnter={(e) => (e.currentTarget.style.color = "#6366f1")}
+                      onMouseLeave={(e) =>
+                        (e.currentTarget.style.color = isDarkMode ? "#ffffff" : "#0f172a")
+                      }
+                      title="Click to view details"
                     >
                       {todo.title}
                     </h4>
@@ -1481,12 +1501,20 @@ const ShowTodos = () => {
                           {startIndex + index + 1}
                         </td>
                         <td
+                          onClick={() => handleOpenViewModal(todo)}
                           style={{
                             padding: "14px 18px",
                             fontWeight: 600,
                             color: isDarkMode ? "#ffffff" : "#0f172a",
                             fontSize: "14px",
+                            cursor: "pointer",
+                            transition: "color 0.2s ease",
                           }}
+                          onMouseEnter={(e) => (e.currentTarget.style.color = "#6366f1")}
+                          onMouseLeave={(e) =>
+                            (e.currentTarget.style.color = isDarkMode ? "#ffffff" : "#0f172a")
+                          }
+                          title="Click to view details"
                         >
                           {todo.title}
                         </td>
